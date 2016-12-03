@@ -3,7 +3,7 @@
 *.ap_
 
 # Files for the ART/Dalvik VM
-*.dex
+.dex
 
 # Java class files
 *.class
@@ -24,7 +24,7 @@ local.properties
 proguard/
 
 # Log Files
-*.log
+.log
 
 # Android Studio Navigation editor temp files
 .navigation/
@@ -34,7 +34,8 @@ captures/
 
 # Intellij
 *.iml
-.idea/workspace.xml
+.idea/
 
 # Keystore files
 *.jks
+gradle/
