@@ -16,9 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with PageTurner.  If not, see <http://www.gnu.org/licenses/>.*
  */
-package com.lqtemple.android.lqbookreader;
+package com.lqtemple.android.lqbookreader.read;
 
 import android.text.Spanned;
+
+import jedi.option.Option;
 
 public interface PageChangeStrategy {
 
@@ -118,21 +120,21 @@ public interface PageChangeStrategy {
 	 * 
 	 * @return the text
 	 */
-	public Spanned getText();
+	public Option<Spanned> getText();
 	
 	/**
 	 * Gets the text for the next page to be displayed, or null if we've reached the end.
 	 * 
 	 * @return
 	 */
-	public CharSequence getNextPageText();
+	public Option<CharSequence> getNextPageText();
 	
 	/**
 	 * Gets the text for the previous page to be displayed, or null if we've reached the start.
 	 * 
 	 * @return
 	 */
-	public CharSequence getPreviousPageText();
+	public Option<CharSequence> getPreviousPageText();
 
     public void setBookView(BookView bookView);
 	

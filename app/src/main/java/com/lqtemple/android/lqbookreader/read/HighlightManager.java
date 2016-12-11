@@ -1,8 +1,9 @@
-package com.lqtemple.android.lqbookreader;
+package com.lqtemple.android.lqbookreader.read;
 
 import android.graphics.Color;
 import android.util.Log;
 
+import com.lqtemple.android.lqbookreader.Configuration;
 import com.lqtemple.android.lqbookreader.dto.HighLight;
 
 import java.util.ArrayList;

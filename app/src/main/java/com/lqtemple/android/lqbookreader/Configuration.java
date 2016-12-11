@@ -26,15 +26,32 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Debug;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 
 import com.lqtemple.android.lqbookreader.dto.HighLight;
+import com.lqtemple.android.lqbookreader.dto.PageOffsets;
 
+import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import jedi.option.Option;
+
+import static java.util.Arrays.asList;
+import static jedi.functional.FunctionalPrimitives.firstOption;
+import static jedi.functional.FunctionalPrimitives.isEmpty;
+import static jedi.functional.FunctionalPrimitives.select;
+import static jedi.option.Options.none;
+import static jedi.option.Options.option;
 
 /**
  * Application configuration class which provides a friendly API to the various
@@ -189,6 +206,9 @@ public class Configuration {
     //Which platform version to start text selection on.
     public static final int TEXT_SELECTION_PLATFORM_VERSION = Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 
+    private static final Logger LOG = LoggerFactory
+            .getLogger("Configuration");
+
     private String defaultSerifFont;
     private String defaultSansFont;
 
@@ -323,6 +343,30 @@ public class Configuration {
         return context.getSharedPreferences(bookHash, 0);
     }
 
+    public Option<List<List<Integer>>> getPageOffsets(String fileName) {
+
+        SharedPreferences bookPrefs = getPrefsForBook(fileName);
+
+        String data = bookPrefs.getString(KEY_OFFSETS, "");
+
+        if ( data.length() == 0 ) {
+            return none();
+        }
+
+        try {
+            PageOffsets offsets = PageOffsets.fromJSON(data);
+
+            if (offsets == null || !offsets.isValid(this)) {
+                return none();
+            }
+
+            return option(offsets.getOffsets());
+
+        } catch ( JSONException js ) {
+            LOG.error( "Could not retrieve page offsets", js );
+            return none();
+        }
+    }
 
     public List<HighLight> getHightLights(String fileName) {
         SharedPreferences prefs = getPrefsForBook(fileName);
@@ -711,6 +755,59 @@ public class Configuration {
 
     public String getCalibrePassword() {
         return settings.getString(CALIBRE_PASSWORD, "");
+    }
+
+    public Option<File> getStorageBase() {
+        return option(Environment.getExternalStorageDirectory());
+    }
+
+    public Option<File> getDownloadsFolder() {
+
+        return firstOption(
+                asList(
+                        ContextCompat.getExternalFilesDirs( context, "Downloads" )
+                )
+        );
+    }
+
+    public Option<File> getLibraryFolder() {
+
+        Option<File> libraryFolder = getStorageBase().map(
+                baseFolder -> new File(baseFolder.getAbsolutePath() + "/LQforum/Books") );
+
+        //If the library-folder on external storage exists, return it
+        if ( ! isEmpty(select(libraryFolder, File::exists))) {
+            return libraryFolder;
+        }
+
+        if ( ! isEmpty(libraryFolder) ) {
+            try {
+                boolean result = libraryFolder.unsafeGet().mkdirs();
+
+                if ( result ) {
+                    return libraryFolder;
+                }
+
+            } catch ( Exception e ) {}
+        }
+
+        return firstOption(
+                asList(
+                        ContextCompat.getExternalFilesDirs( context, "Books" )
+                )
+        );
+    }
+
+    /**
+     * TODO
+     * @return
+     */
+    public Option<File> getMediaFolder() {
+        return firstOption(
+                asList(
+                        ContextCompat.getExternalCacheDirs( context )
+                )
+        );
     }
 
 
