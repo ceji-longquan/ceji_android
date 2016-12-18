@@ -28,6 +28,7 @@ import android.text.TextPaint;
 import android.widget.TextView;
 
 import com.lqtemple.android.lqbookreader.Configuration;
+import com.lqtemple.android.lqbookreader.Singleton;
 import com.lqtemple.android.lqbookreader.StaticLayoutFactory;
 import com.lqtemple.android.lqbookreader.dto.HighLight;
 import com.lqtemple.android.lqbookreader.model.Spine;
@@ -72,7 +73,10 @@ public class FixedPagesStrategy implements PageChangeStrategy {
         this.bookView = bookView;
         this.childView = bookView.getInnerView();
 
-    }
+		config = new Configuration(bookView.getContext());
+		highlightManager = Singleton.getInstance(HighlightManager.class);
+		layoutFactory = new StaticLayoutFactory();
+	}
 
     public void setHighlightManager( HighlightManager highlightManager ) {
         this.highlightManager = highlightManager;
@@ -397,7 +401,7 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 	public void loadText(Spanned text) {
 		this.text = text;
 		this.pageNum = 0;
-		this.pageOffsets = getPageOffsets(text, config.isShowPageNumbers() );
+		this.pageOffsets = getPageOffsets(text, false);
 	}
 
     @Override

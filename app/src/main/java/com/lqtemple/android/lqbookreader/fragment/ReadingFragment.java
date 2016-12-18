@@ -74,6 +74,7 @@ import android.widget.ViewSwitcher;
 import com.lqtemple.android.lqbookreader.BookProgress;
 import com.lqtemple.android.lqbookreader.Configuration;
 import com.lqtemple.android.lqbookreader.R;
+import com.lqtemple.android.lqbookreader.Singleton;
 import com.lqtemple.android.lqbookreader.TextUtil;
 import com.lqtemple.android.lqbookreader.activity.ReadingActivity;
 import com.lqtemple.android.lqbookreader.animation.Animations;
@@ -81,6 +82,7 @@ import com.lqtemple.android.lqbookreader.animation.Animator;
 import com.lqtemple.android.lqbookreader.animation.PageCurlAnimator;
 import com.lqtemple.android.lqbookreader.animation.PageTimer;
 import com.lqtemple.android.lqbookreader.animation.RollingBlindAnimator;
+import com.lqtemple.android.lqbookreader.annotation.InjectUtils;
 import com.lqtemple.android.lqbookreader.annotation.InjectView;
 import com.lqtemple.android.lqbookreader.bookmark.Bookmark;
 import com.lqtemple.android.lqbookreader.bookmark.BookmarkDatabaseHelper;
@@ -194,14 +196,15 @@ public class ReadingFragment extends Fragment implements
     private PowerManager powerManager;
 
     private AudioManager audioManager;
+    private NotificationManager notificationManager;
 
     private Configuration config;
     private TTSPlaybackQueue ttsPlaybackItemQueue;
     private TextLoader textLoader;
     private HighlightManager highlightManager;
+    private BookmarkDatabaseHelper bookmarkDatabaseHelper;
 
 
-    private MenuItem searchMenuItem;
 
 
     private ProgressDialog waitDialog;
@@ -218,8 +221,7 @@ public class ReadingFragment extends Fragment implements
     private String language = "en";
 
     private int currentPageNumber = -1;
-    private NotificationManager notificationManager;
-    private BookmarkDatabaseHelper bookmarkDatabaseHelper;
+
     private SelectedWord selectedWord;
 
 
@@ -254,6 +256,18 @@ public class ReadingFragment extends Fragment implements
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        context = getContext();
+        telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        config = new Configuration(context);
+        ttsPlaybackItemQueue = Singleton.getInstance(TTSPlaybackQueue.class);
+        textLoader = Singleton.getInstance(TextLoader.class);
+        highlightManager = Singleton.getInstance(HighlightManager.class);
+
+        bookmarkDatabaseHelper  = new BookmarkDatabaseHelper(context);
         super.onCreate(savedInstanceState);
 
         // Restore preferences
@@ -275,6 +289,7 @@ public class ReadingFragment extends Fragment implements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        InjectUtils.bind(this);
         setHasOptionsMenu(true);
         this.bookView.init();
 
@@ -434,6 +449,7 @@ public class ReadingFragment extends Fragment implements
         }
 
         if (file == null) {
+            file = "";
             file = config.getLastOpenedFile();
         }
 
@@ -548,10 +564,6 @@ public class ReadingFragment extends Fragment implements
         if ( audioManager.isMusicActive() ) {
             return;
         }
-//
-//        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO ) {
-//            subscribeToMediaButtons();
-//        }
 
         playBeep(false);
 
@@ -734,35 +746,6 @@ public class ReadingFragment extends Fragment implements
         }
     };
 
-//    @TargetApi(Build.VERSION_CODES.FROYO)
-//    private void subscribeToMediaButtons() {
-//        if ( this.mediaReceiver == null ) {
-//            this.mediaReceiver = new PageTurnerMediaReceiver();
-//            IntentFilter filter = new IntentFilter(MediaButtonReceiver.INTENT_PAGETURNER_MEDIA);
-//            context.registerReceiver(mediaReceiver, filter);
-//
-//            ComponentName remoteControlsReceiver = new ComponentName(context, MediaButtonReceiver.class);
-//            audioManager.registerMediaButtonEventReceiver(remoteControlsReceiver);
-//
-//            if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH ) {
-//                registerRemoteControlClient(remoteControlsReceiver);
-//            }
-//        }
-//    }
-
-
-
-    @TargetApi(Build.VERSION_CODES.FROYO)
-    private void unsubscribeFromMediaButtons() {
-//        if ( this.mediaReceiver != null  ) {
-//            context.unregisterReceiver(mediaReceiver);
-//            this.mediaReceiver = null;
-//
-//            audioManager.unregisterMediaButtonEventReceiver(
-//                    new ComponentName(context, MediaButtonReceiver.class));
-//        }
-    }
-
     private boolean ttsIsRunning() {
         return ttsPlaybackItemQueue.isActive();
     }
@@ -826,11 +809,6 @@ public class ReadingFragment extends Fragment implements
         this.ttsPlaybackItemQueue.deactivate();
 
         this.mediaLayout.setVisibility(View.GONE);
-        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO && unsubscribeMediaButtons ) {
-            unsubscribeFromMediaButtons();
-        }
-
-//        this.textToSpeech.stop();
 
         this.ttsItemPrep.clear();
 
@@ -911,7 +889,7 @@ public class ReadingFragment extends Fragment implements
         pageNumberView.setTextColor(config.getTextColor());
         pageNumberView.setTextSize(config.getTextSize());
 
-        pageNumberView.setTypeface(config.getDefaultFontFamily().getDefaultTypeface());
+//        pageNumberView.setTypeface(config.getDefaultFontFamily().getDefaultTypeface());
 
         pageNumberView.setText(pageString);
         pageNumberView.setGravity(Gravity.CENTER);
@@ -1091,56 +1069,6 @@ public class ReadingFragment extends Fragment implements
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenu.ContextMenuInfo menuInfo) {
 
-        // This is a hack to give the longclick handler time
-        // to find the word the user long clicked on.
-//
-//        if (this.selectedWord != null) {
-//
-//            final CharSequence word = this.selectedWord.getText();
-//            final int startIndex = this.selectedWord.getStartOffset();
-//            final int endIndex = this.selectedWord.getEndOffset();
-//
-//            String header = String.format(getString(R.string.word_select),
-//                    selectedWord.getText() );
-//
-//            menu.setHeaderTitle(header);
-//
-//            if (isDictionaryAvailable()) {
-//                android.view.MenuItem item = menu
-//                        .add(getString(R.string.dictionary_lookup));
-//                onMenuPress(item).thenDo( () -> lookupDictionary(word.toString()) );
-//            }
-//
-//            menu.add(R.string.highlight).setOnMenuItemClickListener( item -> {
-//                highLight( startIndex, endIndex, word.toString() );
-//                return false;
-//            });
-//
-//            android.view.MenuItem lookUpWikipediaItem = menu
-//                    .add(getString(R.string.wikipedia_lookup));
-//
-//            onMenuPress(lookUpWikipediaItem).thenDo(
-//                    () -> lookupWikipedia(word.toString()));
-//
-//
-//            android.view.MenuItem lookUpWiktionaryItem = menu
-//                    .add(getString(R.string.lookup_wiktionary));
-//
-//            lookUpWiktionaryItem.setOnMenuItemClickListener( item -> {
-//                lookupWiktionary(word.toString());
-//                return true;
-//            });
-//
-//            android.view.MenuItem lookupGoogleItem = menu
-//                    .add(getString(R.string.google_lookup));
-//
-//            lookupGoogleItem.setOnMenuItemClickListener( item -> {
-//                lookupGoogle(word.toString());
-//                return true;
-//            });
-//
-//            this.selectedWord = null;
-//        }
     }
 
     @Override
@@ -1492,13 +1420,6 @@ public class ReadingFragment extends Fragment implements
 
         LOG.debug("Got key event: " + keyCode + " with action " + action);
 
-        if ( searchMenuItem != null && searchMenuItem.isActionViewExpanded() ) {
-            boolean result = searchMenuItem.getActionView().dispatchKeyEvent(event);
-
-            if ( result ) {
-                return true;
-            }
-        }
 
         final int KEYCODE_NOOK_TOUCH_BUTTON_LEFT_TOP = 92;
         final int KEYCODE_NOOK_TOUCH_BUTTON_LEFT_BOTTOM = 93;

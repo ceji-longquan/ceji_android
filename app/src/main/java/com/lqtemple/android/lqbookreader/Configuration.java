@@ -220,7 +220,7 @@ public class Configuration {
             defaultSerifFont = "serif";
             defaultSansFont = "sans";
         } else {
-            defaultSerifFont = "gen_book_bas";
+            defaultSerifFont = "serif";
             defaultSansFont = "sans";
         }
 
@@ -241,7 +241,7 @@ public class Configuration {
             editor.putInt(PREFIX_NIGHT + "_" + KEY_TEXT, Color.WHITE);
             editor.putInt(PREFIX_NIGHT + "_" + KEY_LINK,
                     Color.rgb(0xb0, 0xb0, 0xb0));
-            editor.commit();
+            editor.apply();
         }
     }
 
@@ -603,15 +603,10 @@ public class Configuration {
 
         if (!fontCache.containsKey(fontFace)) {
 
+            // TODO add font
             if ("gen_book_bas".equals(fontFace)) {
                 fontCache.put(fontFace,
                         loadFamilyFromAssets(fontFace, "GentiumBookBasic"));
-            } else if ("gen_bas".equals(fontFace)) {
-                fontCache.put(fontFace,
-                        loadFamilyFromAssets(fontFace, "GentiumBasic"));
-            } else if ("frankruehl".equalsIgnoreCase(fontFace)) {
-                fontCache.put(fontFace,
-                        loadFamilyFromAssets(fontFace, "FrankRuehl"));
             } else {
 
                 Typeface face = Typeface.SANS_SERIF;

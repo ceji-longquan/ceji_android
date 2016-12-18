@@ -31,4 +31,12 @@ public class Book {
         // TODO 多语言翻译的名称不同
         return "XueCheng";
     }
+
+    public JContent getContentByIndex(String index) {
+        for (JContent content : getContent()) {
+            content.getIndex().equals(index);
+            return content;
+        }
+        return null;
+    }
 }

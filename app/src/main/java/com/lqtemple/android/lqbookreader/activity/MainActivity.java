@@ -1,28 +1,32 @@
 package com.lqtemple.android.lqbookreader.activity;
 
+import android.content.Intent;
 import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.View;
 
-import com.alibaba.fastjson.JSON;
+import com.lqtemple.android.lqbookreader.FileUtils;
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.model.Book;
-import com.lqtemple.android.lqbookreader.model.RawBook;
 import com.lqtemple.android.lqbookreader.model.Spine;
 
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private Book book;
+    private File target;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        StrictMode.enableDefaults();
         // 全屏
         initData();
     }
@@ -30,27 +34,15 @@ public class MainActivity extends AppCompatActivity {
     private void initData() {
         AssetManager manager = getAssets();
         InputStream  inputStream = null;
+        target = new File(getExternalCacheDir(), "test.json");
         try {
-             inputStream = manager.open("cj.json");
-            byte[] bytes = new byte[inputStream.available()];
-            int read = 0;
-            while ((read = inputStream.read(bytes)) != -1 ){
 
-            }
-            String result = new String(bytes, "utf-8");
-            RawBook rawBook = JSON.parseObject(result, RawBook.class);
-            Log.d("BOOK", rawBook.toString());
-         } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            inputStream = manager.open("cj.json");
+            FileUtils.writeFile(target, inputStream);
+        } catch (Exception e) {
+
         }
+
     }
 
     private void  initBookSpine() {
@@ -60,5 +52,11 @@ public class MainActivity extends AppCompatActivity {
     private void countPage() {
         List contents = book.getContent();
 
+    }
+
+    public void onStartRead(View v) {
+        Intent i = new Intent(this, ReadingActivity.class);
+        i.setData(Uri.fromFile(target));
+        startActivity(i);
     }
 }

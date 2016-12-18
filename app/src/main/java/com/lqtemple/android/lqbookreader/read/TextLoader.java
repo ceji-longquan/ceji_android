@@ -21,9 +21,11 @@ package com.lqtemple.android.lqbookreader.read;
 
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 
 import com.lqtemple.android.lqbookreader.Configuration;
-import com.lqtemple.android.lqbookreader.model.RawBook;
+import com.lqtemple.android.lqbookreader.model.Book;
+import com.lqtemple.android.lqbookreader.model.JContent;
 import com.lqtemple.android.lqbookreader.view.FastBitmapDrawable;
 
 import org.slf4j.Logger;
@@ -53,7 +55,7 @@ public class TextLoader{
     private static final double CACHE_CLEAR_THRESHOLD = 0.75;
 
     private String currentFile;
-    private RawBook currentBook;
+    private Book currentBook;
     private Map<String, Spannable> renderedText = new HashMap<>();
 
     private Map<String, FastBitmapDrawable> imageCache = new HashMap<>();
@@ -62,6 +64,7 @@ public class TextLoader{
     private Map<String, Map<String, Integer>> anchors = new HashMap<>();
 
     private static final Logger LOG = LoggerFactory.getLogger("TextLoader");
+    private TextSpanner mTextSpanner;
 
 
     public void invalidateCachedText() {
@@ -74,7 +77,7 @@ public class TextLoader{
     }
 
 
-    public RawBook initBook(String fileName) throws IOException {
+    public Book initBook(String fileName) throws IOException {
 
         if (fileName == null) {
             throw new IOException("No file-name specified.");
@@ -89,11 +92,11 @@ public class TextLoader{
 
         this.anchors = new HashMap<>();
 
-        RawBook newBook = BookLoader.load(fileName);
+        Book newBook = BookLoader.load(fileName);
 
         this.currentBook = newBook;
         this.currentFile = fileName;
-
+        mTextSpanner = new TextSpanner(currentBook);
         return newBook;
 
     }
@@ -107,7 +110,7 @@ public class TextLoader{
         return none();
     }
 
-    public RawBook getCurrentBook() {
+    public Book getCurrentBook() {
         return this.currentBook;
     }
 
@@ -136,6 +139,10 @@ public class TextLoader{
         LOG.debug( "Checking for cached resource: " + resource );
 
         return option(renderedText.get(ref));
+    }
+
+    public Spannable getText() {
+        return mTextSpanner.buildAll();
     }
 
     public Spannable getText(final String index) throws IOException {
@@ -169,7 +176,7 @@ public class TextLoader{
 
         Spannable result = new SpannableString("");
         try {
-            result = TextSpanner.from(index);
+            result = mTextSpanner.from(index);
             renderedText.put(index, result);
         } catch (Exception e) {
             LOG.error("Caught exception while rendering text", e);
@@ -184,13 +191,6 @@ public class TextLoader{
         return result;
     }
 
-//    private void closeLazyLoadedResources() {
-//        if ( currentBook != null ) {
-//            for ( Resource res: currentBook.getResources().getAll() ) {
-//                res.close();
-//            }
-//        }
-//    }
 
     public void clearCachedText() {
         clearImageCache();
@@ -222,7 +222,29 @@ public class TextLoader{
         imageCache.clear();
     }
 
+    private class TextSpanner {
 
+        private final Book book;
+
+        public TextSpanner(Book book) {
+            this.book = book;
+        }
+
+        // TODO 加载文本
+        public  Spannable from(String index) {
+            JContent content = book.getContentByIndex(index);
+            SpannableString spannableString = new SpannableString(content.getText());
+            return spannableString;
+        }
+
+        public Spannable buildAll() {
+            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
+            for (JContent content : book.getContent()){
+                spannableStringBuilder.append(content.getText());
+            }
+            return spannableStringBuilder;
+        }
+    }
 
 
 }

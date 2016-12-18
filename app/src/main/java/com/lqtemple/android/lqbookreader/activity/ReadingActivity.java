@@ -19,12 +19,15 @@
 package com.lqtemple.android.lqbookreader.activity;
 
 
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.lqtemple.android.lqbookreader.Configuration;
+import com.lqtemple.android.lqbookreader.MyApplication;
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.fragment.ReadingFragment;
 
@@ -46,19 +49,18 @@ public class ReadingActivity extends AppCompatActivity {
         return R.layout.activity_reading;
     }
 
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        Configuration config = new Configuration(this);
+        MyApplication.changeLanguageSetting(this, config);
+
+        setTheme( getTheme(config) );
+        super.onCreate(savedInstanceState);
+        setContentView(getMainLayoutResource());
 
 
-
-//
-//    @Override
-//    protected void startPreferences() {
-//        if ( readingFragment != null ) {
-//            this.readingFragment.saveConfigState();
-//        }
-//
-//        Intent intent = new Intent(this, PageTurnerPrefsActivity.class);
-//        startActivity(intent);
-//    }
+        readingFragment = (ReadingFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_reading);
+    }
 
     protected int getTheme(Configuration config) {
         int theme = config.getTheme();
@@ -73,8 +75,6 @@ public class ReadingActivity extends AppCompatActivity {
 
         return theme;
     }
-
-
 
     @Override
     public boolean onSearchRequested() {

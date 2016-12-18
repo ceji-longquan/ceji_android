@@ -1,12 +1,17 @@
 package com.lqtemple.android.lqbookreader.read;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.text.Layout;
+import android.text.Spannable;
 import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.ClickableSpan;
 import android.util.AttributeSet;
 import android.view.ActionMode;
@@ -16,6 +21,7 @@ import android.widget.TextView;
 
 import com.lqtemple.android.lqbookreader.Configuration;
 import com.lqtemple.android.lqbookreader.R;
+import com.lqtemple.android.lqbookreader.Singleton;
 import com.lqtemple.android.lqbookreader.dto.HighLight;
 import com.lqtemple.android.lqbookreader.model.Book;
 import com.lqtemple.android.lqbookreader.model.Spine;
@@ -28,6 +34,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jedi.functional.Command;
 import jedi.option.Option;
@@ -76,7 +84,8 @@ public class BookView extends ScrollView{
     public BookView(Context context, AttributeSet attributes) {
         super(context, attributes);
         this.scrollHandler = new Handler();
-
+        this.textLoader = Singleton.getInstance(TextLoader.class);
+        this.configuration = new Configuration(context);
     }
 
     public void init() {
@@ -286,39 +295,29 @@ public class BookView extends ScrollView{
     }
 
     void loadText() {
+        if (spine == null) {
+            try {
+                Book book = initBookAndSpine();
 
-        if ( spine == null && ! textLoader.hasCachedBook( this.fileName ) ) {
-//            taskQueue.executeTask( new OpenFileTask() );
-//            taskQueue.executeTask( new LoadTextTask() );
-//            taskQueue.executeTask( new PreLoadTask(spine, textLoader) );
-//            taskQueue.executeTask( new CalculatePageNumbersTask() );
-        } else {
-
-            if ( spine == null ) {
-                try {
-                    Book book = initBookAndSpine();
-
-                    if ( book != null ) {
-                        bookOpened( book );
-                    }
-
-                } catch ( IOException io ) {
-                    errorOnBookOpening( io.getMessage() );
-                    return;
-                } catch ( OutOfMemoryError e ) {
-                    errorOnBookOpening( getContext().getString( R.string.out_of_memory ) );
-                    return;
+                if (book != null) {
+                    bookOpened(book);
                 }
+                Spannable result = textLoader.getText();
+                strategy.loadText(result);
+
+            } catch (IOException io) {
+                errorOnBookOpening(io.getMessage());
+                return;
+            } catch (OutOfMemoryError e) {
+                errorOnBookOpening(getContext().getString(R.string.out_of_memory));
+                return;
             }
-//
-//            //TODO: what if the resource is None?
-//            spine.getCurrentResource().forEach( this::loadText );
         }
     }
 
     private Book initBookAndSpine() throws IOException {
 
-        Book book =  Book.from(textLoader.initBook(fileName));
+        Book book =  textLoader.initBook(fileName);
 
         this.book = book;
         this.spine = new Spine(book);
@@ -350,6 +349,29 @@ public class BookView extends ScrollView{
     private void errorOnBookOpening(String errorMessage) {
         for (BookViewListener listener : this.listeners) {
             listener.errorOnBookOpening(errorMessage);
+        }
+    }
+    private void parseEntryStart(int entry) {
+        for (BookViewListener listener : this.listeners) {
+            listener.parseEntryStart(entry);
+        }
+    }
+
+    private void parseEntryComplete( String name) {
+        for (BookViewListener listener : this.listeners) {
+            listener.parseEntryComplete(name);
+        }
+    }
+
+    private void fireOpenFile() {
+        for (BookViewListener listener : this.listeners) {
+            listener.readingFile();
+        }
+    }
+
+    private void fireRenderingText() {
+        for (BookViewListener listener : this.listeners) {
+            listener.renderingText();
         }
     }
 
@@ -730,6 +752,7 @@ public class BookView extends ScrollView{
     Spine getSpine() {
         return this.spine;
     }
+
     public void setEnableScrolling(boolean enableScrolling) {
 
         if (this.strategy == null
@@ -812,6 +835,134 @@ public class BookView extends ScrollView{
         this.fileName = null;
 
         this.strategy.reset();
+    }
+
+    /**
+     *  Params is string index : like '1-2-0';
+     */
+    private class LoadTextTask extends
+            AsyncTask<String, BookReadPhase, Option<Spanned>> {
+
+        private String name;
+
+        private String searchTerm = null;
+
+        public LoadTextTask() {
+
+        }
+
+        LoadTextTask(String searchTerm) {
+            this.searchTerm = searchTerm;
+        }
+
+        public Option<Spanned> doInBackground(String... resources) {
+
+            publishProgress(BookReadPhase.START);
+
+            try {
+
+                this.name = spine.getCurrentTitle().getOrElse("");
+
+
+                publishProgress(BookReadPhase.PARSE_TEXT);
+
+                Spannable result = textLoader.getText(resources[0]);
+
+                //Clear any old highlighting spans
+
+                SearchResultSpan[] spans = result.getSpans(0, result.length(), SearchResultSpan.class);
+                for ( BackgroundColorSpan span: spans ) {
+                    result.removeSpan(span);
+                }
+
+                // Highlight search results (if any)
+                if ( searchTerm != null ) {
+                    Pattern pattern = Pattern.compile(Pattern.quote((searchTerm)),Pattern.CASE_INSENSITIVE);
+                    Matcher matcher = pattern.matcher(result);
+
+                    while ( matcher.find() ) {
+                        result.setSpan(new SearchResultSpan(),
+                                matcher.start(), matcher.end(),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                }
+
+                //If the view isn't ready yet, wait a bit.
+//                while ( getInnerView().getWidth() == 0 ) {
+//                    Thread.sleep(100);
+//                }
+
+                strategy.loadText(result);
+
+                return option(result);
+            } catch (Exception | OutOfMemoryError io ) {
+                LOG.error( "Error loading text", io );
+
+                //FIXME: actually use this error
+                //this.error = String.format( getContext().getString(R.string.could_not_load),
+                //      io.getMessage());
+
+                //this.error = getContext().getString(R.string.out_of_memory);
+            }
+
+            return none();
+        }
+
+        public void doOnProgressUpdate(BookReadPhase... values) {
+
+            BookReadPhase phase = values[0];
+
+            switch (phase) {
+                case START:
+                    parseEntryStart(getIndex());
+                    break;
+                case PARSE_TEXT:
+                    fireRenderingText();
+                    break;
+                case DONE:
+                    parseEntryComplete(this.name);
+                    break;
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(BookReadPhase... values) {
+           doOnProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Option<Spanned> spanneds) {
+            doOnPostExecute(spanneds);
+        }
+
+        public void doOnPostExecute(Option<Spanned> result) {
+
+            restorePosition();
+            strategy.updateGUI();
+            progressUpdate();
+
+            onProgressUpdate(BookReadPhase.DONE);
+
+            /**
+             * This is a hack for scrolling not updating to the right position
+             * on Android 4+
+             */
+            if ( strategy.isScrolling() ) {
+                scrollHandler.postDelayed( BookView.this::restorePosition, 100 );
+            }
+        }
+    }
+
+
+    private static enum BookReadPhase {
+        START, OPEN_FILE, PARSE_TEXT, DONE
+    }
+
+    @SuppressLint("ParcelCreator")
+    private static class SearchResultSpan extends BackgroundColorSpan {
+        public SearchResultSpan() {
+            super( Color.YELLOW );
+        }
     }
 
     public static class InnerView extends TextView {
