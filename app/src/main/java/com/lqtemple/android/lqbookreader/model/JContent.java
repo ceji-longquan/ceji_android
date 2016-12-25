@@ -61,6 +61,9 @@ public class JContent {
     }
 
     public String getText() {
+        if (!text.endsWith("\n")) {
+            text = text.concat("\n");
+        }
         return text;
     }
 
@@ -70,6 +73,10 @@ public class JContent {
 
     public int getType() {
         return type;
+    }
+
+    public Type getTypeEnum() {
+        return Type.values()[type];
     }
 
     public void setType(int type) {
@@ -91,6 +98,9 @@ public class JContent {
     public void setImageUrl(List<String> imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+
+
 
     public static class AnnotationBean {
         /**

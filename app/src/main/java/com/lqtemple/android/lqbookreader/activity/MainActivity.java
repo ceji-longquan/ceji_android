@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void countPage() {
-        List contents = book.getContent();
+        List contents = book.getJContent();
 
     }
 

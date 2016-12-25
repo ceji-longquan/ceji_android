@@ -24,6 +24,7 @@ import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.Singleton;
 import com.lqtemple.android.lqbookreader.dto.HighLight;
 import com.lqtemple.android.lqbookreader.model.Book;
+import com.lqtemple.android.lqbookreader.model.PageIndex;
 import com.lqtemple.android.lqbookreader.model.Spine;
 
 import org.slf4j.Logger;
@@ -80,6 +81,7 @@ public class BookView extends ScrollView{
     private Configuration configuration;
     private PageChangeStrategy scrollingStrategy = new ScrollingStrategy();
     private PageChangeStrategy fixedPagesStrategy = new FixedPagesStrategy();
+    private PageCounter pageCounter;
 
     public BookView(Context context, AttributeSet attributes) {
         super(context, attributes);
@@ -103,6 +105,7 @@ public class BookView extends ScrollView{
         if (Build.VERSION.SDK_INT >= Configuration.TEXT_SELECTION_PLATFORM_VERSION ) {
             childView.setTextIsSelectable(true);
         }
+        pageCounter = new PageCounter(getContext());
 
         this.setSmoothScrollingEnabled(false);
 
@@ -302,8 +305,6 @@ public class BookView extends ScrollView{
                 if (book != null) {
                     bookOpened(book);
                 }
-                Spannable result = textLoader.getText();
-                strategy.loadText(result);
 
             } catch (IOException io) {
                 errorOnBookOpening(io.getMessage());
@@ -332,6 +333,18 @@ public class BookView extends ScrollView{
             offsets.filter( o -> o.size() > 0 ).forEach(
                     (Command<? super List<List<Integer>>>) o -> spine.setPageOffsets( o ));
         }
+
+        pageCounter.setBookView(this);
+        post(new Runnable() {
+            @Override
+            public void run() {
+                List<PageIndex> pageIndices = pageCounter.caculPageNumber();
+                CharSequence charSequence = pageCounter.getSpannedChapterText().get(0);
+                childView.setText(charSequence);
+
+            }
+        });
+
 
         return book;
     }

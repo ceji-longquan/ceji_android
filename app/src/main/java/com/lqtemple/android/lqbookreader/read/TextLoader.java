@@ -239,7 +239,7 @@ public class TextLoader{
 
         public Spannable buildAll() {
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-            for (JContent content : book.getContent()){
+            for (JContent content : book.getJContent()){
                 spannableStringBuilder.append(content.getText());
             }
             return spannableStringBuilder;

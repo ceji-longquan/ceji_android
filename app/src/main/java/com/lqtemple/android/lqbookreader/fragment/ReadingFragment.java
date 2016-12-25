@@ -47,6 +47,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -1925,6 +1926,7 @@ public class ReadingFragment extends Fragment implements
 
     private void loadNewBook(String fileName) {
 
+        Log.d("ReadingFragment", "load book:" + fileName);
         Activity activity = getActivity();
 
         if ( activity != null ) {

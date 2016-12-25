@@ -5,22 +5,32 @@ package com.lqtemple.android.lqbookreader.model;
  */
 
 public class PageIndex {
-    private int para; // paragraph
-    private int index; // the last char index of paragraph
+    private String paraIndex; // paragraph
+    private int offset; // the char offset of paragraph
 
-    public int getPara() {
-        return para;
+    public int getSpanedTextOffset() {
+        return spanedTextOffset;
     }
 
-    public void setPara(int para) {
-        this.para = para;
+    public void setSpanedTextOffset(int spanedTextOffset) {
+        this.spanedTextOffset = spanedTextOffset;
     }
 
-    public int getIndex() {
-        return index;
+    private int spanedTextOffset; // the char offset of paragraph
+
+    public String getParaIndex() {
+        return paraIndex;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public void setParaIndex(String paraIndex) {
+        this.paraIndex = paraIndex;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
     }
 }
