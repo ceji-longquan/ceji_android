@@ -31,11 +31,13 @@ public class PageCounter {
     private BookView mBookView;
     private SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
 
-    public List<CharSequence> getSpannedChapterText() {
-        return mSpannedChapterText;
+
+    public Spanned getSpannedText() {
+        return spannableStringBuilder;
     }
 
-    private List<CharSequence> mSpannedChapterText = new ArrayList<>();
+    private List<Spanned> mSpannedChapterText = new ArrayList<>();
+
     public PageCounter(Context context) {
         mContext = context.getApplicationContext();
         mStaticLayoutFactory = new StaticLayoutFactory();
@@ -43,11 +45,11 @@ public class PageCounter {
 
     public void setBookView(BookView bookView) {
         mBookView = bookView;
-        mBook = bookView.getBook();
     }
 
     public List<PageIndex> caculPageNumber() {
 
+        //TODO offset 全文本offset
         // TODO 当文字变更是重新计算
         if (!mPageIndices.isEmpty()) {
             return mPageIndices;
@@ -55,6 +57,7 @@ public class PageCounter {
         int contentIndex = 0;
         int paraIndex = 0;
 
+        spannableStringBuilder.clear();
         for (List<Content> chapter : mBook.getChapters() ) {
 
             for (Content content : chapter) {
@@ -77,18 +80,21 @@ public class PageCounter {
             spannableStringBuilder.clear();
         }
 
+        for (Spanned spanned : mSpannedChapterText) {
+            spannableStringBuilder.append(spanned);
+        }
         return mPageIndices;
 
     }
 
     private void cacuPageOffsetOneChapter(List<Content> chapter) {
 
-        int boundedWidth = mBookView.getInnerView().getMeasuredWidth();
+        int boundedWidth = (int) PagetSizeConfig.getPageWidth(mBookView.getContext());
         StaticLayout layout = mStaticLayoutFactory.create(spannableStringBuilder,
                 mBookView.getInnerView().getPaint(), boundedWidth, mBookView.getLineSpacing());
         layout.draw(new Canvas());
 
-        int pageHeight = mBookView.getMeasuredHeight();
+        int pageHeight = (int) PagetSizeConfig.getPageHeight(mBookView.getContext());
 
 
 
@@ -134,6 +140,8 @@ public class PageCounter {
                 PageIndex pageIndex = new PageIndex();
                 pageIndex.setParaIndex(content.getIndex());
                 pageIndex.setOffset(pageStartOffset - contentOffset);
+                int totalOffset = pageStartOffset - contentOffset + content.getTotalOffset();
+                pageIndex.setTotalOffset(totalOffset);
                 pageIndex.setSpanedTextOffset(pageStartOffset);
                 return pageIndex;
             }
@@ -161,5 +169,9 @@ public class PageCounter {
 
     private int getContentDepth(Content content) {
         return content.getIndex().split("-").length;
+    }
+
+    public void setBook(Book book) {
+        this.mBook = book;
     }
 }

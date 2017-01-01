@@ -25,7 +25,11 @@ public class HighlightManager {
 
     private Configuration config;
 
-    private void updateBookFile( String fileName ) {
+    public void setConfig(Configuration config) {
+        this.config = config;
+    }
+
+    private void updateBookFile(String fileName ) {
 
         if ( currentFileName != null && !currentFileName.equals(fileName) ) {
             saveHighLights();

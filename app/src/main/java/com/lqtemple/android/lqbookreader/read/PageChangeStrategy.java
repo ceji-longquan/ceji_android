@@ -24,6 +24,8 @@ import jedi.option.Option;
 
 public interface PageChangeStrategy {
 
+	void initBookPages();
+
 	/**
 	 * Loads the given section of text.
 	 * 

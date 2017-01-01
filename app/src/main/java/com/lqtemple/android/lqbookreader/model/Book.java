@@ -34,18 +34,22 @@ public class Book {
         Book book = new Book(rawBook);
         return book;
     }
+
     private void initChapters() {
         int offset = 0;
+        int totalOffset = 0;
         int chapterOffset = 0;
         List<Content> chapter = null;
         for (JContent content : mRawBook.getContent()) {
             Content c = new Content(content);
             c.setOffset(offset);
-            offset += content.getText().length();
+            c.setTotalOffset(totalOffset);
+            int len = content.getText().length();
+            offset += len;
+            totalOffset += len;
             mContents.add(c);
 
             chapterOffset++;
-            offset++;
             if (c.isChapterStart()) {
                 chapter = new ArrayList<>();
                 offset = 0;

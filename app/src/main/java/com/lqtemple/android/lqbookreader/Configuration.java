@@ -465,7 +465,7 @@ public class Configuration {
     }
 
     public boolean isFullScreenEnabled() {
-        return settings.getBoolean(KEY_FULL_SCREEN, false);
+        return settings.getBoolean(KEY_FULL_SCREEN, true);
     }
 
     public boolean isStripWhiteSpaceEnabled() {

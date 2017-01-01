@@ -9,6 +9,7 @@ public class Content {
     JContent mJContent;
     private int mOffset;
     private int mParagraphIndex;
+    private int totalOffset;
 
     public Content(JContent JContent) {
         mJContent = JContent;
@@ -52,5 +53,13 @@ public class Content {
         if (mJContent.getType() != Type.Title.ordinal()) return false;
         String[] indexStr = getIndex().split("-");
         return indexStr.length == 2 && indexStr[1].equals("0");
+    }
+
+    public int getTotalOffset() {
+        return totalOffset;
+    }
+
+    public void setTotalOffset(int totalOffset) {
+        this.totalOffset = totalOffset;
     }
 }

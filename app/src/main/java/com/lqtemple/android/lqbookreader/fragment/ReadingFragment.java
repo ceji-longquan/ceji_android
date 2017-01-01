@@ -263,10 +263,11 @@ public class ReadingFragment extends Fragment implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        config = new Configuration(context);
+        config = new Configuration(context.getApplicationContext());
         ttsPlaybackItemQueue = Singleton.getInstance(TTSPlaybackQueue.class);
         textLoader = Singleton.getInstance(TextLoader.class);
         highlightManager = Singleton.getInstance(HighlightManager.class);
+        highlightManager.setConfig(config);
 
         bookmarkDatabaseHelper  = new BookmarkDatabaseHelper(context);
         super.onCreate(savedInstanceState);
@@ -635,48 +636,6 @@ public class ReadingFragment extends Fragment implements
         } );
     }
 
-    /** Checked exception to indicate TTS failure **/
-    private static class TTSFailedException extends Exception {}
-
-    public void onStreamingCompleted(final String wavFile) {
-
-        LOG.debug("TTS streaming completed for " + wavFile );
-
-        if ( ! ttsIsRunning() ) {
-//            this.textToSpeech.stop();
-            return;
-        }
-
-        if ( ! ttsItemPrep.containsKey(wavFile) ) {
-            LOG.error("Got onStreamingCompleted for " + wavFile + " but there is no corresponding TTSPlaybackItem!");
-            return;
-        }
-
-        final TTSPlaybackItem item = ttsItemPrep.remove(wavFile);
-
-        try {
-
-            MediaPlayer mediaPlayer = item.getMediaPlayer();
-            mediaPlayer.reset();
-            mediaPlayer.setDataSource(wavFile);
-            mediaPlayer.prepare();
-
-            this.ttsPlaybackItemQueue.add(item);
-
-        } catch (Exception e) {
-            LOG.error("Could not play", e);
-            showTTSFailed(e.getLocalizedMessage());
-            return;
-        }
-
-        this.uiHandler.post( this::closeWaitDialog );
-
-        //If the queue is size 1, it only contains the player we just added,
-        //meaning this is a first playback start.
-        if ( ttsPlaybackItemQueue.size() == 1 ) {
-            startPlayback();
-        }
-    }
 
     private Runnable progressBarUpdater = new Runnable() {
 

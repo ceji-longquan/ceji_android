@@ -31,6 +31,7 @@ import com.lqtemple.android.lqbookreader.Configuration;
 import com.lqtemple.android.lqbookreader.Singleton;
 import com.lqtemple.android.lqbookreader.StaticLayoutFactory;
 import com.lqtemple.android.lqbookreader.dto.HighLight;
+import com.lqtemple.android.lqbookreader.model.PageIndex;
 import com.lqtemple.android.lqbookreader.model.Spine;
 
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import java.util.List;
 
 import jedi.option.Option;
 
+import static android.media.CamcorderProfile.get;
 import static java.util.Collections.emptyList;
 import static jedi.option.Options.none;
 import static jedi.option.Options.option;
@@ -61,14 +63,16 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 	
 	private int pageNum;
 	
-	private List<Integer> pageOffsets = new ArrayList<>();
+	
 	
 	private BookView bookView;
 	private TextView childView;
 
 	private int storedPosition = -1;
+	private PageCounter pageCounter;
+	private List<PageIndex> pageIndices;
 
-    @Override
+	@Override
     public void setBookView(BookView bookView) {
         this.bookView = bookView;
         this.childView = bookView.getInnerView();
@@ -76,6 +80,17 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 		config = new Configuration(bookView.getContext());
 		highlightManager = Singleton.getInstance(HighlightManager.class);
 		layoutFactory = new StaticLayoutFactory();
+		pageCounter = new PageCounter(bookView.getContext());
+		pageCounter.setBookView(bookView);
+
+	}
+
+	@Override
+	public void initBookPages() {
+		pageCounter.setBook(bookView.getBook());
+
+		pageIndices = pageCounter.caculPageNumber();
+		text = pageCounter.getSpannedText();
 	}
 
     public void setHighlightManager( HighlightManager highlightManager ) {
@@ -100,7 +115,7 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 	public void clearText() {
 		this.text = new SpannableStringBuilder("");
 		this.childView.setText(text);
-		this.pageOffsets = new ArrayList<Integer>();
+		this.pageIndices = new ArrayList<>();
 	}
 	
 	/**
@@ -111,107 +126,29 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 	public int getCurrentPage() {
 		return this.pageNum;
 	}
-
-    public List<Integer> getPageOffsets() {
-        return new ArrayList<>(this.pageOffsets);
-    }
-
-	public List<Integer> getPageOffsets(CharSequence text, boolean includePageNumbers ) {
-		
-		if ( text == null ) {
-			return emptyList();
-        }
-		
-		List<Integer> pageOffsets = new ArrayList<Integer>();
-		
-		TextPaint textPaint = bookView.getInnerView().getPaint();
-		int boundedWidth = bookView.getInnerView().getMeasuredWidth();
-
-        LOG.debug( "Page width: " + boundedWidth );
-
-		StaticLayout layout = layoutFactory.create(text, textPaint, boundedWidth, bookView.getLineSpacing() );
-
-        if ( layout == null ) {
-            return emptyList();
-        }
-
-        LOG.debug( "Layout height: " + layout.getHeight() );
-		
-		layout.draw(new Canvas());
-
-        //Subtract the height of the top margin
-		int pageHeight = bookView.getMeasuredHeight() - bookView.getVerticalMargin();
-
-		if ( includePageNumbers ) {
-			String bottomSpace = "0\n";
-		
-			StaticLayout numLayout = layoutFactory.create(bottomSpace, textPaint, boundedWidth , bookView.getLineSpacing());
-			numLayout.draw(new Canvas());
-			
-			//Subtract the height needed to show page numbers, or the
-            //height of the margin, whichever is more
-			pageHeight = pageHeight - Math.max(numLayout.getHeight(), bookView.getVerticalMargin());
-		} else {
-            //Just subtract the bottom margin
-            pageHeight = pageHeight - bookView.getVerticalMargin();
-        }
-
-        LOG.debug("Got pageHeight " + pageHeight );
-
-		int totalLines = layout.getLineCount();				
-		int topLineNextPage = -1;
-		int pageStartOffset = 0;
-		
-		while ( topLineNextPage < totalLines -1 ) {
-
-            LOG.debug( "Processing line " + topLineNextPage + " / " + totalLines );
-
-			int topLine = layout.getLineForOffset(pageStartOffset);				
-			topLineNextPage = layout.getLineForVertical( layout.getLineTop( topLine ) + pageHeight);
-
-            LOG.debug( "topLine " + topLine + " / " + topLineNextPage );
-			if ( topLineNextPage == topLine ) { //If lines are bigger than can fit on a page
-				topLineNextPage = topLine + 1;
-			}
-						
-			int pageEnd = layout.getLineEnd(topLineNextPage -1);
-
-            LOG.debug("pageStartOffset=" + pageStartOffset + ", pageEnd=" + pageEnd );
-			
-			if (pageEnd > pageStartOffset ) {
-                if ( text.subSequence(pageStartOffset, pageEnd).toString().trim().length() > 0) {
-                    pageOffsets.add(pageStartOffset);
-                }
-				pageStartOffset = layout.getLineStart(topLineNextPage);
-			}
-		}
-		
-		return pageOffsets;		
-	}
-	
 	
 	@Override
 	public void reset() {
 		clearStoredPosition();
-		this.pageOffsets.clear();
+		this.pageIndices.clear();
 		clearText();
 	}
 	
 	private void updatePageNumber() {
-		for ( int i=0; i < this.pageOffsets.size(); i++ ) {
-			if ( this.pageOffsets.get(i) > this.storedPosition ) {
+		for ( int i=0; i < this.pageIndices.size(); i++ ) {
+			if ( this.pageIndices.get(i).getTotalOffset() > this.storedPosition ) {
 				this.pageNum = i -1;
 				return;
 			}
 		}
 
-		this.pageNum = this.pageOffsets.size() - 1;
+		this.pageNum = this.pageIndices.size() - 1;
 	}
 	
 	@Override
 	public void updatePosition() {
-		
-		if ( pageOffsets.isEmpty() || text.length() == 0 || this.pageNum == -1) {
+
+		if ( pageIndices.isEmpty() || text.length() == 0 || this.pageNum == -1) {
 			return;
 		}
 		
@@ -245,10 +182,10 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 	
 	private Option<CharSequence> getTextForPage(int page ) {
 		
-		if ( pageOffsets.size() < 1 || page < 0 ) {
+		if ( pageIndices.size() < 1 || page < 0 ) {
 			return none();
-		} else if ( page >= pageOffsets.size() -1 ) {
-            int startOffset = pageOffsets.get(pageOffsets.size() -1);
+		} else if ( page >= pageIndices.size() -1 ) {
+            int startOffset = pageIndices.get(pageIndices.size() -1).getTotalOffset();
 
             if ( startOffset >= 0 && startOffset <= text.length() -1 ) {
 			    return some(applySpans(this.text.subSequence(startOffset, text.length()), startOffset));
@@ -256,8 +193,8 @@ public class FixedPagesStrategy implements PageChangeStrategy {
                 return some(applySpans(text, 0));
             }
 		} else {
-			int start = this.pageOffsets.get(page);
-			int end = this.pageOffsets.get(page +1 );
+			int start = this.pageIndices.get(page).getTotalOffset();
+			int end = this.pageIndices.get(page +1 ).getTotalOffset();
 			return some(applySpans( this.text.subSequence(start, end), start ));
 		}	
 	}
@@ -299,20 +236,20 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 
     public int getTopLeftPosition() {
 
-        if ( pageOffsets.isEmpty() ) {
+        if ( pageIndices.isEmpty() ) {
             return 0;
         }
 
-        if ( this.pageNum >= this.pageOffsets.size() ) {
-            return this.pageOffsets.get( this.pageOffsets.size() -1 );
+        if ( this.pageNum >= this.pageIndices.size() ) {
+            return this.pageIndices.get( this.pageIndices.size() -1 ).getTotalOffset();
         }
 
-        return this.pageOffsets.get(this.pageNum);
+        return this.pageIndices.get(this.pageNum).getTotalOffset();
     }
 	
 	public int getProgressPosition() {
 
-        if ( storedPosition > 0 || this.pageOffsets.isEmpty() ||  this.pageNum == -1 ) {
+        if ( storedPosition > 0 || this.pageIndices.isEmpty() ||  this.pageNum == -1 ) {
             return this.storedPosition;
         }
 
@@ -324,7 +261,7 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 	}
 	
 	public boolean isAtEnd() {
-		return pageNum == this.pageOffsets.size() - 1;
+		return pageNum == this.pageIndices.size() - 1;
 	}
 	
 	public boolean isAtStart() {
@@ -371,7 +308,7 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 			bookView.loadText();
 			
 		} else {
-			this.pageNum = Math.min(pageNum +1, this.pageOffsets.size() -1 );
+			this.pageNum = Math.min(pageNum +1, this.pageIndices.size() -1 );
 			updatePosition();
 		}
 	}
@@ -401,7 +338,7 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 	public void loadText(Spanned text) {
 		this.text = text;
 		this.pageNum = 0;
-		this.pageOffsets = getPageOffsets(text, false);
+		this.pageIndices = pageCounter.caculPageNumber();
 	}
 
     @Override

@@ -101,7 +101,12 @@ public class ScrollingStrategy implements PageChangeStrategy {
 	public boolean isAtStart() {
 		return getTopLeftPosition() == 0;
 	}
-	
+
+	@Override
+	public void initBookPages() {
+
+	}
+
 	@Override
 	public void loadText(Spanned newText) {
         SpannableStringBuilder builder = new SpannableStringBuilder(newText);

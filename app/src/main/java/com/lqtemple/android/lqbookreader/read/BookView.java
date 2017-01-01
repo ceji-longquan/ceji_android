@@ -81,13 +81,13 @@ public class BookView extends ScrollView{
     private Configuration configuration;
     private PageChangeStrategy scrollingStrategy = new ScrollingStrategy();
     private PageChangeStrategy fixedPagesStrategy = new FixedPagesStrategy();
-    private PageCounter pageCounter;
 
     public BookView(Context context, AttributeSet attributes) {
         super(context, attributes);
         this.scrollHandler = new Handler();
         this.textLoader = Singleton.getInstance(TextLoader.class);
         this.configuration = new Configuration(context);
+
     }
 
     public void init() {
@@ -105,7 +105,6 @@ public class BookView extends ScrollView{
         if (Build.VERSION.SDK_INT >= Configuration.TEXT_SELECTION_PLATFORM_VERSION ) {
             childView.setTextIsSelectable(true);
         }
-        pageCounter = new PageCounter(getContext());
 
         this.setSmoothScrollingEnabled(false);
 
@@ -298,6 +297,7 @@ public class BookView extends ScrollView{
     }
 
     void loadText() {
+
         if (spine == null) {
             try {
                 Book book = initBookAndSpine();
@@ -305,6 +305,7 @@ public class BookView extends ScrollView{
                 if (book != null) {
                     bookOpened(book);
                 }
+                strategy.initBookPages();
 
             } catch (IOException io) {
                 errorOnBookOpening(io.getMessage());
@@ -318,9 +319,8 @@ public class BookView extends ScrollView{
 
     private Book initBookAndSpine() throws IOException {
 
-        Book book =  textLoader.initBook(fileName);
+        book = textLoader.initBook(fileName);
 
-        this.book = book;
         this.spine = new Spine(book);
 
         this.spine.navigateByIndex(BookView.this.storedIndex);
@@ -333,18 +333,6 @@ public class BookView extends ScrollView{
             offsets.filter( o -> o.size() > 0 ).forEach(
                     (Command<? super List<List<Integer>>>) o -> spine.setPageOffsets( o ));
         }
-
-        pageCounter.setBookView(this);
-        post(new Runnable() {
-            @Override
-            public void run() {
-                List<PageIndex> pageIndices = pageCounter.caculPageNumber();
-                CharSequence charSequence = pageCounter.getSpannedChapterText().get(0);
-                childView.setText(charSequence);
-
-            }
-        });
-
 
         return book;
     }
@@ -463,11 +451,6 @@ public class BookView extends ScrollView{
 
         LOG.debug("Pages before this index: " + pageNum );
 
-
-        if ( this.strategy instanceof FixedPagesStrategy ) {
-            List<Integer> strategyOffsets = ( (FixedPagesStrategy) this.strategy ).getPageOffsets();
-            LOG.debug("Offsets according to strategy: " + asString(strategyOffsets) );
-        }
 
         for ( int i=0; i < offsets.size() && offsets.get(i) <= position; i++ ) {
             pageNum++;

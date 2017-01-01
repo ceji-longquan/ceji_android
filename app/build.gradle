@@ -35,7 +35,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.alibaba:fastjson:1.2.21'
-    compile 'com.android.support:design:24.2.1'
     compile 'org.slf4j:slf4j-android:1.7.21'
     compile 'org.codehaus.jedi:jedi-core:3.0.5'
 }

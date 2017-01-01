@@ -8,6 +8,8 @@ public class PageIndex {
     private String paraIndex; // paragraph
     private int offset; // the char offset of paragraph
 
+    private int totalOffset;
+
     public int getSpanedTextOffset() {
         return spanedTextOffset;
     }
@@ -32,5 +34,13 @@ public class PageIndex {
 
     public void setOffset(int offset) {
         this.offset = offset;
+    }
+
+    public int getTotalOffset() {
+        return totalOffset;
+    }
+
+    public void setTotalOffset(int totalOffset) {
+        this.totalOffset = totalOffset;
     }
 }
