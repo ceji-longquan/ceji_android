@@ -95,6 +95,7 @@ import com.lqtemple.android.lqbookreader.read.HighlightManager;
 import com.lqtemple.android.lqbookreader.read.SelectedWord;
 import com.lqtemple.android.lqbookreader.read.TextLoader;
 import com.lqtemple.android.lqbookreader.read.TextSelectionCallback;
+import com.lqtemple.android.lqbookreader.read.ToastFactory;
 import com.lqtemple.android.lqbookreader.view.AnimatedImageView;
 import com.lqtemple.android.lqbookreader.view.NavGestureDetector;
 import com.lqtemple.android.lqbookreader.view.NavigationCallback;
@@ -1440,6 +1441,7 @@ public class ReadingFragment extends Fragment implements
     private void pageDown(Orientation o) {
 
         if (bookView.isAtEnd()) {
+            ToastFactory.showPageEnd();
             return;
         }
 
@@ -1483,6 +1485,7 @@ public class ReadingFragment extends Fragment implements
     private void pageUp(Orientation o) {
 
         if (bookView.isAtStart()) {
+            ToastFactory.showPageStart();
             return;
         }
 

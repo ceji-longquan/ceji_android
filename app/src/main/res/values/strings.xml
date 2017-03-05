@@ -362,6 +362,8 @@
     <string name="pref_sync_server_message">Please enter a sync server url.</string>
 
     <string name="share">Share</string>
+    <string name="book_reach_end_toast">已经是本书最后一页</string>
+    <string name="book_reach_start_toast">已经是本书第一页</string>
 
     <!-- Translation is not needed for the strings below -->
     <string name="no_author_byline" translatable="false">by John Doe</string>

@@ -26,8 +26,11 @@ import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lqtemple.android.lqbookreader.Configuration;
+import com.lqtemple.android.lqbookreader.MyApplication;
+import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.Singleton;
 import com.lqtemple.android.lqbookreader.StaticLayoutFactory;
 import com.lqtemple.android.lqbookreader.dto.HighLight;
@@ -296,6 +299,7 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 
         this.storedPosition = -1;
 
+		// TODO
 		if ( isAtEnd() ) {
 			Spine spine = bookView.getSpine();
 		
@@ -303,10 +307,8 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 				return;
 			}
 			
-			this.clearText();
 			this.pageNum = 0;
-			bookView.loadText();
-			
+			updatePosition();
 		} else {
 			this.pageNum = Math.min(pageNum +1, this.pageIndices.size() -1 );
 			updatePosition();
@@ -325,9 +327,8 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 				return;
 			}
 			
-			this.clearText();
 			this.storedPosition = Integer.MAX_VALUE;
-			this.bookView.loadText();
+			updatePosition();
 		} else {
 			this.pageNum = Math.max(pageNum -1, 0);
 			updatePosition();
