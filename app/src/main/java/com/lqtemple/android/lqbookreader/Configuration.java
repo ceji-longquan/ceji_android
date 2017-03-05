@@ -572,7 +572,7 @@ public class Configuration {
                     + value.getClass().getSimpleName());
         }
 
-        editor.commit();
+        editor.apply();
     }
 
     private void updateValue(String key, Object value) {
@@ -813,7 +813,7 @@ public class Configuration {
     public void setCopyToLibraryOnScan(boolean value) {
         settings.edit()
                 .putBoolean(KEY_COPY_TO_LIB, value)
-                .commit();
+                .apply();
     }
 
     public boolean getUseCustomScanFolder() {
@@ -823,7 +823,7 @@ public class Configuration {
     public void setUseCustomScanFolder(boolean value) {
         settings.edit()
                 .putBoolean(KEY_USE_SCAN_FOLDER, value)
-                .commit();
+                .apply();
     }
 
 
