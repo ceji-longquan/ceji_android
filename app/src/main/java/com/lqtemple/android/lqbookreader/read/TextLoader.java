@@ -64,7 +64,7 @@ public class TextLoader{
     private Map<String, Map<String, Integer>> anchors = new HashMap<>();
 
     private static final Logger LOG = LoggerFactory.getLogger("TextLoader");
-    private TextSpanner mTextSpanner;
+
 
 
     public void invalidateCachedText() {
@@ -96,7 +96,6 @@ public class TextLoader{
 
         this.currentBook = newBook;
         this.currentFile = fileName;
-        mTextSpanner = new TextSpanner(currentBook);
         return newBook;
 
     }
@@ -141,10 +140,6 @@ public class TextLoader{
         return option(renderedText.get(ref));
     }
 
-    public Spannable getText() {
-        return mTextSpanner.buildAll();
-    }
-
     public Spannable getText(final String index) throws IOException {
 
         Option<Spannable> cached = getCachedTextForResource( index );
@@ -176,7 +171,6 @@ public class TextLoader{
 
         Spannable result = new SpannableString("");
         try {
-            result = mTextSpanner.from(index);
             renderedText.put(index, result);
         } catch (Exception e) {
             LOG.error("Caught exception while rendering text", e);
@@ -221,30 +215,5 @@ public class TextLoader{
 
         imageCache.clear();
     }
-
-    private class TextSpanner {
-
-        private final Book book;
-
-        public TextSpanner(Book book) {
-            this.book = book;
-        }
-
-        // TODO 加载文本
-        public  Spannable from(String index) {
-            JContent content = book.getContentByIndex(index);
-            SpannableString spannableString = new SpannableString(content.getText());
-            return spannableString;
-        }
-
-        public Spannable buildAll() {
-            SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-            for (JContent content : book.getJContent()){
-                spannableStringBuilder.append(content.getText());
-            }
-            return spannableStringBuilder;
-        }
-    }
-
 
 }

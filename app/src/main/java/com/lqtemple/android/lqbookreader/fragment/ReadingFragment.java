@@ -95,8 +95,6 @@ import com.lqtemple.android.lqbookreader.read.HighlightManager;
 import com.lqtemple.android.lqbookreader.read.SelectedWord;
 import com.lqtemple.android.lqbookreader.read.TextLoader;
 import com.lqtemple.android.lqbookreader.read.TextSelectionCallback;
-import com.lqtemple.android.lqbookreader.tts.TTSPlaybackItem;
-import com.lqtemple.android.lqbookreader.tts.TTSPlaybackQueue;
 import com.lqtemple.android.lqbookreader.view.AnimatedImageView;
 import com.lqtemple.android.lqbookreader.view.NavGestureDetector;
 import com.lqtemple.android.lqbookreader.view.NavigationCallback;
@@ -107,10 +105,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import jedi.functional.Command;
 import jedi.option.Option;
@@ -200,16 +196,12 @@ public class ReadingFragment extends Fragment implements
     private NotificationManager notificationManager;
 
     private Configuration config;
-    private TTSPlaybackQueue ttsPlaybackItemQueue;
     private TextLoader textLoader;
     private HighlightManager highlightManager;
     private BookmarkDatabaseHelper bookmarkDatabaseHelper;
 
-
-
-
     private ProgressDialog waitDialog;
-    private Map<String, TTSPlaybackItem> ttsItemPrep = new HashMap<>();
+
 
     private boolean ttsAvailable = false;
 
@@ -264,7 +256,6 @@ public class ReadingFragment extends Fragment implements
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         config = new Configuration(context.getApplicationContext());
-        ttsPlaybackItemQueue = Singleton.getInstance(TTSPlaybackQueue.class);
         textLoader = Singleton.getInstance(TextLoader.class);
         highlightManager = Singleton.getInstance(HighlightManager.class);
         highlightManager.setConfig(config);
@@ -334,7 +325,7 @@ public class ReadingFragment extends Fragment implements
             public void onProgressChanged(SeekBar seekBar,
                                           int progress, boolean fromUser) {
                 if (fromUser) {
-                    seekToPointInPlayback(progress);
+//                    seekToPointInPlayback(progress);progress
                 }
             }
         });
@@ -343,77 +334,6 @@ public class ReadingFragment extends Fragment implements
 //        this.bookView.setTextSelectionCallback(this);
     }
 
-    private void seekToPointInPlayback(int position) {
-
-        TTSPlaybackItem item = this.ttsPlaybackItemQueue.peek();
-
-        if ( item != null ) {
-            item.getMediaPlayer().seekTo(position);
-        }
-    }
-
-    public void onMediaButtonEvent( int buttonId ) {
-
-        if ( buttonId == R.id.playPauseButton &&
-                ! ttsIsRunning() ) {
-            startTextToSpeech();
-            return;
-        }
-
-        TTSPlaybackItem item = this.ttsPlaybackItemQueue.peek();
-
-        if ( item == null ) {
-            stopTextToSpeech(false);
-            return;
-        }
-
-        MediaPlayer mediaPlayer = item.getMediaPlayer();
-        uiHandler.removeCallbacks(progressBarUpdater);
-
-        switch ( buttonId ) {
-            case R.id.stopButton:
-                stopTextToSpeech(true);
-                return;
-            case R.id.nextButton:
-                performSkip(true);
-                uiHandler.post(progressBarUpdater);
-                return;
-            case R.id.prevButton:
-                performSkip(false);
-                uiHandler.post(progressBarUpdater);
-                return;
-
-            case R.id.playPauseButton:
-                if ( mediaPlayer.isPlaying() ) {
-                    mediaPlayer.pause();
-                } else {
-                    mediaPlayer.start();
-                    uiHandler.post(progressBarUpdater);
-                }
-                return;
-        }
-    }
-
-    private void performSkip( boolean toEnd ) {
-
-        if ( ! ttsIsRunning() ) {
-            return;
-        }
-
-        TTSPlaybackItem item = this.ttsPlaybackItemQueue.peek();
-
-        if ( item != null ) {
-            MediaPlayer player = item.getMediaPlayer();
-
-            if ( toEnd ) {
-                player.seekTo( player.getDuration() );
-            } else {
-                player.seekTo(0);
-            }
-
-        }
-
-    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -431,7 +351,7 @@ public class ReadingFragment extends Fragment implements
         View.OnTouchListener gestureListener = new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                return !ttsIsRunning() && gestureDetector.onTouchEvent(event);
+                return gestureDetector.onTouchEvent(event);
             }
         };
 
@@ -473,12 +393,6 @@ public class ReadingFragment extends Fragment implements
             } else {
                 bookView.restore();
             }
-        }
-
-        if ( ttsIsRunning() ) {
-            this.mediaLayout.setVisibility(View.VISIBLE);
-            this.ttsPlaybackItemQueue.updateSpeechCompletedCallbacks( this::speechCompleted );
-            uiHandler.post( progressBarUpdater );
         }
 
     }
@@ -559,220 +473,6 @@ public class ReadingFragment extends Fragment implements
         } catch (Exception io) {
             //We'll manage without the beep :)
         }
-    }
-
-    private void startTextToSpeech() {
-
-        if ( audioManager.isMusicActive() ) {
-            return;
-        }
-
-        playBeep(false);
-
-        Option<File> fosOption = config.getMediaFolder();
-
-        if ( isEmpty(fosOption) ) {
-            LOG.error("Could not get base folder for TTS");
-            showTTSFailed("Could not get base folder for TTS");
-        }
-
-        File fos = fosOption.unsafeGet();
-
-//        if ( fos.exists() && ! fos.isDirectory() ) {
-//            fos.delete();
-//        }
-//
-//        fos.mkdirs();
-
-        if ( ! (fos.exists() && fos.isDirectory() )  ) {
-            LOG.error("Failed to create folder " + fos.getAbsolutePath() );
-            showTTSFailed("Failed to create folder " + fos.getAbsolutePath() );
-            return;
-        }
-
-        saveReadingPosition();
-        //Delete any old TTS files still present.
-        for ( File f: fos.listFiles() ) {
-            f.delete();
-        }
-//
-//        ttsItemPrep.clear();
-
-        if (! ttsAvailable ) {
-            return;
-        }
-
-        this.wordView.setTextColor( config.getTextColor() );
-        this.wordView.setBackgroundColor( config.getBackgroundColor() );
-
-        this.ttsPlaybackItemQueue.activate();
-        this.mediaLayout.setVisibility(View.VISIBLE);
-
-        this.getWaitDialog().setMessage(getString(R.string.init_tts));
-        this.getWaitDialog().show();
-
-        // TODO play mp3
-        // 1 got file
-        // 2 seek to right position
-
-    }
-
-
-
-    private void showTTSFailed(final String message) {
-        uiHandler.post( () -> {
-
-            stopTextToSpeech(true);
-            closeWaitDialog();
-
-            if ( isAdded() ) {
-                playBeep(true);
-
-                StringBuilder textBuilder = new StringBuilder( getString(R.string.tts_failed) );
-                textBuilder.append("\n").append(message);
-
-                Toast.makeText(context, textBuilder.toString(), Toast.LENGTH_SHORT).show();
-            }
-        } );
-    }
-
-
-    private Runnable progressBarUpdater = new Runnable() {
-
-        private boolean pausedBecauseOfCall = false;
-
-        public void run() {
-
-            if ( ! ttsIsRunning() ) {
-                return;
-            }
-
-            long delay = 1000;
-
-            synchronized ( ttsPlaybackItemQueue ) {
-
-                TTSPlaybackItem item = ttsPlaybackItemQueue.peek();
-
-                if ( item != null ) {
-
-                    MediaPlayer mediaPlayer = item.getMediaPlayer();
-
-                    int phoneState = telephonyManager.getCallState();
-
-                    if ( mediaPlayer != null && mediaPlayer.isPlaying() ) {
-
-                        if ( phoneState == TelephonyManager.CALL_STATE_RINGING ||
-                                phoneState == TelephonyManager.CALL_STATE_OFFHOOK ) {
-
-                            LOG.debug("Detected call, pausing TTS.");
-
-                            mediaPlayer.pause();
-                            this.pausedBecauseOfCall = true;
-                        } else {
-
-                            double percentage = (double) mediaPlayer.getCurrentPosition() / (double) mediaPlayer.getDuration();
-
-                            mediaProgressBar.setMax(mediaPlayer.getDuration());
-                            mediaProgressBar.setProgress(mediaPlayer.getCurrentPosition());
-
-                            int currentDuration = item.getOffset() + (int) (percentage * item.getText().length());
-
-                            // TODO change
-                            bookView.navigateTo(bookView.getIndex(), currentDuration );
-
-                            wordView.setText( item.getText() );
-
-                            delay = 100;
-
-                        }
-
-                    } else if ( mediaPlayer != null && phoneState == TelephonyManager.CALL_STATE_IDLE
-                            && pausedBecauseOfCall ) {
-                        LOG.debug("Call over, resuming TTS.");
-
-                        //We reset to the start of the current section before resuming playback.
-                        mediaPlayer.seekTo(0);
-
-                        mediaPlayer.start();
-                        pausedBecauseOfCall = false;
-                        delay = 100;
-                    }
-                }
-            }
-
-            // Running this thread after 100 milliseconds
-            uiHandler.postDelayed(this, delay);
-
-        }
-    };
-
-    private boolean ttsIsRunning() {
-        return ttsPlaybackItemQueue.isActive();
-    }
-
-    /**
-     * Called when a speech fragment has finished being played.
-     *
-     * @param item
-     * @param mediaPlayer
-     */
-    public void speechCompleted( TTSPlaybackItem item, MediaPlayer mediaPlayer ) {
-
-        LOG.debug("Speech completed for " + item.getFileName() );
-
-        if (! ttsPlaybackItemQueue.isEmpty() ) {
-            this.ttsPlaybackItemQueue.remove();
-        }
-
-        if ( ttsIsRunning()  ) {
-
-            startPlayback();
-
-            if ( item.isLastElementOfPage() ) {
-                this.uiHandler.post( () -> pageDown(Orientation.VERTICAL) );
-            }
-        }
-
-        mediaPlayer.release();
-        new File(item.getFileName()).delete();
-    }
-
-    private void startPlayback() {
-
-        LOG.debug("startPlayback() - doing peek()");
-
-        final TTSPlaybackItem item = this.ttsPlaybackItemQueue.peek();
-
-        if ( item == null ) {
-            LOG.debug("Got null item, bailing out.");
-            return;
-        }
-
-        LOG.debug("Start playback for item " + item.getFileName());
-        LOG.debug("Text: '" + item.getText() + "'");
-
-        if ( item.getMediaPlayer().isPlaying() ) {
-            return;
-        }
-
-        item.setOnSpeechCompletedCallback( this::speechCompleted );
-        uiHandler.post(progressBarUpdater);
-
-        item.getMediaPlayer().start();
-
-
-
-    }
-
-    private void stopTextToSpeech(boolean unsubscribeMediaButtons) {
-
-        this.ttsPlaybackItemQueue.deactivate();
-
-        this.mediaLayout.setVisibility(View.GONE);
-
-        this.ttsItemPrep.clear();
-
-        saveReadingPosition();
     }
 
     @Override
@@ -1280,7 +980,7 @@ public class ReadingFragment extends Fragment implements
     private boolean handleVolumeButtonEvent(KeyEvent event) {
 
         //Disable volume button handling during TTS
-        if (!config.isVolumeKeyNavEnabled() || ttsIsRunning() ) {
+        if (!config.isVolumeKeyNavEnabled()) {
             return false;
         }
 
@@ -1337,7 +1037,7 @@ public class ReadingFragment extends Fragment implements
         int action = event.getAction();
         int keyCode = event.getKeyCode();
 
-        if ( audioManager.isMusicActive() && ! ttsIsRunning() ) {
+        if ( audioManager.isMusicActive() ) {
             return false;
         }
 
@@ -1363,7 +1063,6 @@ public class ReadingFragment extends Fragment implements
 
     private boolean simulateButtonPress(int action, int idToSend, ImageButton buttonToClick ) {
         if ( action == KeyEvent.ACTION_DOWN ) {
-            onMediaButtonEvent(idToSend);
             buttonToClick.setPressed(true);
         } else {
             buttonToClick.setPressed(false);
@@ -1402,7 +1101,7 @@ public class ReadingFragment extends Fragment implements
 		 *
 		 * So, we only try to read media events here if tts is running.
 		 */
-        if ( ! ttsIsRunning() && dispatchMediaKeyEvent(event) ) {
+        if (dispatchMediaKeyEvent(event)) {
             return true;
         }
 

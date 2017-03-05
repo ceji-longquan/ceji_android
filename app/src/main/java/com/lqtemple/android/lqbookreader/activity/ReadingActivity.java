@@ -60,33 +60,10 @@ public class ReadingActivity extends AppCompatActivity {
         setTheme( getTheme(config) );
         super.onCreate(savedInstanceState);
         setContentView(getMainLayoutResource());
-        hideSystemUI();
 
         readingFragment = (ReadingFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_reading);
     }
 
-    // This snippet hides the system bars.
-    private void hideSystemUI() {
-        // Set the IMMERSIVE flag.
-        // Set the content to appear under the system bars so that the content
-        // doesn't resize when the system bars hide and show.
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    }
-
-    // This snippet shows the system bars. It does this by removing all the flags
-    // except for the ones that make the content appear under the system bars.
-    private void showSystemUI() {
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-    }
     protected int getTheme(Configuration config) {
         int theme = config.getTheme();
 
@@ -113,7 +90,7 @@ public class ReadingActivity extends AppCompatActivity {
 	}
 
 	public void onMediaButtonEvent(View view) {
-		this.readingFragment.onMediaButtonEvent(view.getId());
+        // TODO
 	}
 
 	@Override

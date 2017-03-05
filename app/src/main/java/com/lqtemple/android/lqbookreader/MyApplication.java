@@ -8,6 +8,15 @@ import android.content.Context;
  */
 
 public class MyApplication extends Application{
+
+    private static MyApplication sContext;
+
+    @Override
+    public void onCreate() {
+        sContext = this;
+        super.onCreate();
+    }
+
     public static void changeLanguageSetting(Context context, Configuration pageTurnerConfig) {
         android.content.res.Configuration config = new android.content.res.Configuration(
                 context.getResources().getConfiguration());
@@ -15,5 +24,9 @@ public class MyApplication extends Application{
         // TODO too much times
         config.locale = pageTurnerConfig.getLocale();
         context.getResources().updateConfiguration(config, context.getResources().getDisplayMetrics());
+    }
+
+    public static MyApplication getsContext() {
+        return sContext;
     }
 }
