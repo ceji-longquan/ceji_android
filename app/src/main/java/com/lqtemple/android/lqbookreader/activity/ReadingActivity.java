@@ -53,7 +53,7 @@ public class ReadingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        Configuration config = new Configuration(this);
+        Configuration config = Configuration.getInstance();
         MyApplication.changeLanguageSetting(this, config);
 
 

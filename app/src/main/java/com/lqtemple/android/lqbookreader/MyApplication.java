@@ -13,8 +13,9 @@ public class MyApplication extends Application{
 
     @Override
     public void onCreate() {
-        sContext = this;
         super.onCreate();
+        sContext = this;
+        Configuration.init(this);
     }
 
     public static void changeLanguageSetting(Context context, Configuration pageTurnerConfig) {

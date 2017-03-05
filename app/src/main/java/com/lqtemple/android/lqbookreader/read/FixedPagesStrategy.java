@@ -80,7 +80,7 @@ public class FixedPagesStrategy implements PageChangeStrategy {
         this.bookView = bookView;
         this.childView = bookView.getInnerView();
 
-		config = new Configuration(bookView.getContext());
+		config = Configuration.getInstance();
 		highlightManager = Singleton.getInstance(HighlightManager.class);
 		layoutFactory = new StaticLayoutFactory();
 		pageCounter = new PageCounter(bookView.getContext());

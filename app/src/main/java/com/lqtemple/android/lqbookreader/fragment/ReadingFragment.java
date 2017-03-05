@@ -256,7 +256,7 @@ public class ReadingFragment extends Fragment implements
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        config = new Configuration(context.getApplicationContext());
+        config = Configuration.getInstance();
         textLoader = Singleton.getInstance(TextLoader.class);
         highlightManager = Singleton.getInstance(HighlightManager.class);
         highlightManager.setConfig(config);

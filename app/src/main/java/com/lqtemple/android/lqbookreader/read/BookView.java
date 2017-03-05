@@ -22,6 +22,7 @@ import android.widget.TextView;
 import com.lqtemple.android.lqbookreader.Configuration;
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.Singleton;
+import com.lqtemple.android.lqbookreader.animation.PageCurlAnimator;
 import com.lqtemple.android.lqbookreader.dto.HighLight;
 import com.lqtemple.android.lqbookreader.model.Book;
 import com.lqtemple.android.lqbookreader.model.PageIndex;
@@ -86,7 +87,7 @@ public class BookView extends ScrollView{
         super(context, attributes);
         this.scrollHandler = new Handler();
         this.textLoader = Singleton.getInstance(TextLoader.class);
-        this.configuration = new Configuration(context);
+        this.configuration = Configuration.getInstance();
 
     }
 
@@ -95,6 +96,7 @@ public class BookView extends ScrollView{
 
         this.childView = (InnerView) this.findViewById(R.id.innerView);
         this.childView.setBookView(this);
+        this.childView.setLineSpacing(lineSpacing, configuration.getLineSpacingMult());
 
         childView.setCursorVisible(false);
         childView.setLongClickable(true);
@@ -175,7 +177,7 @@ public class BookView extends ScrollView{
     public void setLineSpacing(int lineSpacing) {
         if (lineSpacing != this.lineSpacing) {
             this.lineSpacing = lineSpacing;
-            this.childView.setLineSpacing(lineSpacing, 1);
+            this.childView.setLineSpacing(lineSpacing, configuration.getLineSpacingMult());
 
             if (strategy != null) {
                 strategy.updatePosition();
@@ -966,6 +968,7 @@ public class BookView extends ScrollView{
         private BookView bookView;
 
         private long blockUntil = 0l;
+        private Layout mLayout;
 
         public InnerView(Context context, AttributeSet attributes) {
             super(context, attributes);
@@ -998,6 +1001,13 @@ public class BookView extends ScrollView{
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
+
+            if (mLayout != null) {
+                canvas.save();
+                canvas.translate(getPaddingLeft(), getPaddingBottom());
+                mLayout.draw(canvas);
+                canvas.restore();
+            }
         }
 
         @TargetApi( Build.VERSION_CODES.HONEYCOMB )
@@ -1015,7 +1025,10 @@ public class BookView extends ScrollView{
                 return null;
             }
         }
-    }
 
+        public void setLayout(Layout mLayout) {
+            this.mLayout = mLayout;
+        }
+    }
 
 }

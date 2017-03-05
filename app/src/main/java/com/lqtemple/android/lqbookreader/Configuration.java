@@ -61,6 +61,7 @@ import static jedi.option.Options.option;
  */
 public class Configuration {
 
+    private static Configuration sInstance;
     private SharedPreferences settings;
     private Context context;
 
@@ -129,6 +130,7 @@ public class Configuration {
     public static final String KEY_MARGIN_V = "margin_v";
 
     public static final String KEY_LINE_SPACING = "line_spacing";
+    public static final String KEY_LINE_SPACING_MULT = "line_spacing_mult";
 
     public static final String KEY_NIGHT_MODE = "night_mode";
     public static final String KEY_SCREEN_ORIENTATION = "screen_orientation";
@@ -212,7 +214,17 @@ public class Configuration {
     private String defaultSerifFont;
     private String defaultSansFont;
 
-    public Configuration(Context context) {
+    public static Configuration getInstance() {
+        return sInstance;
+    }
+
+    public static void init(Context context) {
+        if (sInstance == null) {
+            sInstance = new Configuration(context);
+        }
+    }
+
+    private Configuration(Context context) {
         this.settings = PreferenceManager.getDefaultSharedPreferences(context);
         this.context = context;
 
@@ -514,6 +526,11 @@ public class Configuration {
 
     public int getLineSpacing() {
         return settings.getInt(KEY_LINE_SPACING, 0);
+    }
+
+
+    public float getLineSpacingMult() {
+        return settings.getFloat(KEY_LINE_SPACING_MULT, 1.2f);
     }
 
     public boolean isKeepScreenOn() {
