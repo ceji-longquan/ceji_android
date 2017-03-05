@@ -110,7 +110,8 @@ public class PageCounter {
             topLineNextPage = layout.getLineForVertical(layout.getLineTop(topLine) + pageHeight);
 
             Log.d(TAG, "topLine " + topLine + " / " + topLineNextPage);
-            if (topLineNextPage == topLine) { //If lines are bigger than can fit on a page
+            if (topLineNextPage == topLine) {
+                //If lines are bigger than can fit on a page
                 topLineNextPage = topLine + 1;
             }
 
@@ -132,7 +133,6 @@ public class PageCounter {
     }
 
     private PageIndex findPageIndexByOffset(List<Content> chapter, int pageStartOffset) {
-
         for (Content content : chapter) {
             int contentOffset = content.getOffset();
             if (pageStartOffset < contentOffset) continue;
@@ -157,7 +157,7 @@ public class PageCounter {
         switch (content.getTypeEnum()) {
             case Title:
                 int depth = getContentDepth(content);
-                int extraSize = DensityUtil.sp2px(mContext, 10f) / Math.max(1, depth);
+                int extraSize = DensityUtil.sp2px(mContext, 20f) / Math.max(1, depth - 1);
                 normalSize = normalSize + extraSize;
                 break;
             case Content:
