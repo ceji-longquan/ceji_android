@@ -573,4 +573,5 @@ public class FileUtils {
         File file = new File(path);
         return (file.exists() && file.isFile() ? file.length() : -1);
     }
+
 }

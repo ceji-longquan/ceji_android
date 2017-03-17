@@ -17,6 +17,37 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.ReadingActivity"/>
+
+        <activity
+            android:name=".activity.SettingActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:singleUser="true"
+            />
+        <activity
+            android:name=".activity.DownLoadActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:singleUser="true"
+            />
+        <activity
+            android:name=".activity.DownloadManagerActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:singleUser="true"
+            />
+        <activity
+            android:name=".activity.DesActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:singleUser="true"
+            />
     </application>
+
+
+
 
 </manifest>

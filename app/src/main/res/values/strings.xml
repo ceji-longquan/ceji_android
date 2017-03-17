@@ -379,5 +379,37 @@
     <string name="default_book_title" translatable="false">Title of the book</string>
     <string name="hello_world" translatable="false">Hello world!</string>
 
+    <string name="menu_title1" >新闻</string>
+    <string name="open" >打开</string>
+    <string name="close" >关闭</string>
+    <string name="setting">设置</string>
+    <string name="my_note">我的笔记</string>
+    <string name="downloadtips">开始下载</string>
+
+    <string name="start_down">下载</string>
+    <string name="paushing">暂停中</string>
+    <string name="paush">暂停</string>
+    <string name="down_error">下载出错</string>
+    <string name="down_continue">继续</string>
+    <string name="down_waiting">等待中</string>
+    <string name="down_wait">等待</string>
+    <string name="start_downing">下载中</string>
+    <string name="downLoaded">下载完成</string>
+
+    <string name="alreadydowning">正在下载中，请稍后...</string>
+    <string name="all_down_task">所有下载任务完成</string>
+    <string name="other_down_task">所有下载线程结束，部分下载未完成</string>
+    <string name="down_path">下载路径</string>
+    <string name="enqueue">已加入队列</string>
+    <string name="task_enqueue">任务已经在下载列表中</string>
+    <string name="down_task">请先下载任务</string>
+
+    <string name="stop">停止</string>
+    <string name="first_chapter">第一章</string>
+    <string name="two_chapter">第二章</string>
+    <string name="thrid_chapter">第三章</string>
+
+
+
 
 </resources>
