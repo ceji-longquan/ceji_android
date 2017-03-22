@@ -41,15 +41,9 @@ public class Book {
         int chapterOffset = 0;
         List<Content> chapter = null;
         for (JContent content : mRawBook.getContent()) {
-            Content c = new Content(content);
-            c.setOffset(offset);
-            c.setTotalOffset(totalOffset);
-            int len = content.getText().length();
-            offset += len;
-            totalOffset += len;
-            mContents.add(c);
-
             chapterOffset++;
+            Content c = new Content(content);
+
             if (c.isChapterStart()) {
                 chapter = new ArrayList<>();
                 offset = 0;
@@ -57,9 +51,16 @@ public class Book {
                 mChapters.add(chapter);
             }
 
+            c.setOffset(offset);
+            c.setTotalOffset(totalOffset);
+            mContents.add(c);
             if (chapter != null) {
                 chapter.add(c);
             }
+
+            int len = c.getText().length();
+            offset += len;
+            totalOffset += len;
         }
     }
 

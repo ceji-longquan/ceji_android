@@ -44,7 +44,7 @@ public class StaticLayoutFactory {
 	 * @param spacingadd extra space to be added to each line
 	 * @return a StaticLayout object
 	 */
-	public StaticLayout create(CharSequence source, TextPaint paint, int width, float spacingadd) {
+	public static StaticLayout create(CharSequence source, TextPaint paint, int width, float spacingadd) {
         try{
             return doCreateLayout( source, paint, width, spacingadd );
         } catch (IndexOutOfBoundsException e){
@@ -56,7 +56,7 @@ public class StaticLayoutFactory {
         }
 	}
 
-    private StaticLayout doCreateLayout(CharSequence source, TextPaint paint, int width, float spacingadd ) {
+    private static StaticLayout doCreateLayout(CharSequence source, TextPaint paint, int width, float spacingadd ) {
         return new StaticLayout(source, paint, width, Alignment.ALIGN_NORMAL, Configuration.getInstance().getLineSpacingMult(), spacingadd, true);
     }
 

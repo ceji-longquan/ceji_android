@@ -1,9 +1,7 @@
 package com.lqtemple.android.lqbookreader.read;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -14,7 +12,6 @@ import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ClickableSpan;
 import android.util.AttributeSet;
-import android.view.ActionMode;
 import android.view.MotionEvent;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -22,10 +19,8 @@ import android.widget.TextView;
 import com.lqtemple.android.lqbookreader.Configuration;
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.Singleton;
-import com.lqtemple.android.lqbookreader.animation.PageCurlAnimator;
 import com.lqtemple.android.lqbookreader.dto.HighLight;
 import com.lqtemple.android.lqbookreader.model.Book;
-import com.lqtemple.android.lqbookreader.model.PageIndex;
 import com.lqtemple.android.lqbookreader.model.Spine;
 
 import org.slf4j.Logger;
@@ -542,7 +537,7 @@ public class BookView extends ScrollView{
         this.strategy.updatePosition();
     }
 
-    private void onInnerViewResize() {
+    void onInnerViewResize() {
         restorePosition();
     }
     /**
@@ -963,72 +958,5 @@ public class BookView extends ScrollView{
         }
     }
 
-    public static class InnerView extends TextView {
-
-        private BookView bookView;
-
-        private long blockUntil = 0l;
-        private Layout mLayout;
-
-        public InnerView(Context context, AttributeSet attributes) {
-            super(context, attributes);
-        }
-
-        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-            super.onSizeChanged(w, h, oldw, oldh);
-            bookView.onInnerViewResize();
-        }
-
-        @Override
-        public void onWindowFocusChanged(boolean hasWindowFocus) {
-            /*
-            We override this method to do nothing, since the base
-            implementation closes the ActionMode.
-
-            This means that when the user clicks the overflow menu,
-            the ActionMode is stopped and text selection is ended.
-             */
-        }
-
-        public void setBookView(BookView bookView) {
-            this.bookView = bookView;
-        }
-
-        public void setBlockUntil( long blockUntil ) {
-            this.blockUntil = blockUntil;
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-
-            if (mLayout != null) {
-                canvas.save();
-                canvas.translate(getPaddingLeft(), getPaddingBottom());
-                mLayout.draw(canvas);
-                canvas.restore();
-            }
-        }
-
-        @TargetApi( Build.VERSION_CODES.HONEYCOMB )
-        @Override
-        public ActionMode startActionMode(ActionMode.Callback callback) {
-
-            if ( System.currentTimeMillis() > blockUntil ) {
-
-                LOG.debug("InnerView starting action-mode");
-                return super.startActionMode(callback);
-
-            } else {
-                LOG.debug("Not starting action-mode yet, since block time hasn't expired.");
-                clearFocus();
-                return null;
-            }
-        }
-
-        public void setLayout(Layout mLayout) {
-            this.mLayout = mLayout;
-        }
-    }
 
 }

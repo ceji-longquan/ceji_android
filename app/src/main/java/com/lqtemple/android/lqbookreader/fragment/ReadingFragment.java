@@ -285,6 +285,7 @@ public class ReadingFragment extends Fragment implements
         super.onViewCreated(view, savedInstanceState);
         InjectUtils.bind(this);
         setHasOptionsMenu(true);
+
         this.bookView.init();
 
         this.progressBar.setFocusable(true);

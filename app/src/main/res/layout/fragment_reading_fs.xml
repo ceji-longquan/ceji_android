@@ -17,17 +17,13 @@
         <com.lqtemple.android.lqbookreader.read.BookView
             android:id="@+id/bookView"
         	android:layout_width="fill_parent"
-	        android:layout_height="fill_parent">	        
-          
-                
-                <view class="com.lqtemple.android.lqbookreader.read.BookView$InnerView"
-                    android:id="@+id/innerView"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_weight="1"
-                    />
-                    
-                        
+	        android:layout_height="fill_parent">
+
+			<com.lqtemple.android.lqbookreader.read.InnerView
+				android:id="@+id/innerView"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:layout_weight="1" />
            
         </com.lqtemple.android.lqbookreader.read.BookView>
 	    <com.lqtemple.android.lqbookreader.view.AnimatedImageView
