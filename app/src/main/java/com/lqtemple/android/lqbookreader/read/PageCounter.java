@@ -49,6 +49,7 @@ public class PageCounter {
 
     public List<PageIndex> caculPageNumber() {
 
+        // TODO Paragraph style
         //TODO offset 全文本offset
         // TODO 当文字变更是重新计算
         if (!mPageIndices.isEmpty()) {
@@ -90,12 +91,12 @@ public class PageCounter {
     private void cacuPageOffsetOneChapter(List<Content> chapter) {
 
         int boundedWidth = (int) PagetSizeConfig.getPageWidth(mBookView.getContext());
-        StaticLayout layout = mStaticLayoutFactory.create(spannableStringBuilder,
-                mBookView.getInnerView().getPaint(), boundedWidth, mBookView.getLineSpacing());
+        StaticLayout layout = StaticLayoutFactory.create(spannableStringBuilder,
+                PagetSizeConfig.getPaint(), boundedWidth, PagetSizeConfig.getLineSpacing());
         layout.draw(new Canvas());
 
         int pageHeight = (int) PagetSizeConfig.getPageHeight(mBookView.getContext());
-
+        Log.d(TAG, "Calcu page width = " + boundedWidth + ", height = " + pageHeight);
 
 
         int totalLines = layout.getLineCount();

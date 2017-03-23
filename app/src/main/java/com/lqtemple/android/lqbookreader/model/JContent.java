@@ -61,9 +61,7 @@ public class JContent {
     }
 
     public String getText() {
-        if (!text.endsWith("\n")) {
-            text = text.concat("\n");
-        }
+
         return text;
     }
 

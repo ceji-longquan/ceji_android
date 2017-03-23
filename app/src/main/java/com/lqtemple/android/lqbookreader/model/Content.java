@@ -11,6 +11,9 @@ public class Content {
     private int mParagraphIndex;
     private int totalOffset;
 
+    // 添加缩进和换行
+    private String mFormatText;
+
     public Content(JContent JContent) {
         mJContent = JContent;
         mParagraphIndex = extractParagraphIndex(mJContent.getIndex());
@@ -46,7 +49,18 @@ public class Content {
     }
 
     public CharSequence getText() {
-        return mJContent.getText();
+        if (mFormatText == null) {
+            String text = mJContent.getText();
+            if (getTypeEnum() == Type.Title) {
+                text = "\n".concat(text);
+            }
+            if (!text.endsWith("\n")) {
+                text = text.concat("\n");
+            }
+            mFormatText = text;
+        }
+
+        return mFormatText;
     }
 
     public boolean isChapterStart() {
