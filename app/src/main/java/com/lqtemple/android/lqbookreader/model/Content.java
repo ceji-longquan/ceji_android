@@ -59,9 +59,7 @@ public class Content {
                 // Paragraph leading
                 text = Configuration.getInstance().getLeadingMarginText().concat(text);
             }
-            if (!text.endsWith("\n")) {
-                text = text.concat("\n");
-            }
+            text = text.concat("\n");
             mFormatText = text;
         }
 
