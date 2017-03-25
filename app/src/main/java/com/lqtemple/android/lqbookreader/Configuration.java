@@ -66,6 +66,11 @@ public class Configuration {
     private Context context;
 
     private Map<String, FontFamily> fontCache = new HashMap<>();
+    private String mLeadingMarginText;
+
+    public String getLeadingMarginText() {
+        return mLeadingMarginText;
+    }
 
     public static enum ScrollStyle {
         ROLLING_BLIND, PAGE_TIMER
@@ -222,6 +227,7 @@ public class Configuration {
         if (sInstance == null) {
             sInstance = new Configuration(context);
         }
+
     }
 
     private Configuration(Context context) {
@@ -255,6 +261,9 @@ public class Configuration {
                     Color.rgb(0xb0, 0xb0, 0xb0));
             editor.apply();
         }
+
+        // Leading margin of paragraph.
+        mLeadingMarginText = context.getString(R.string.leading_paragraph);
     }
 
     public String getAppVersion() {

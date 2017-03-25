@@ -9,6 +9,7 @@ import android.text.StaticLayout;
 import android.text.style.AbsoluteSizeSpan;
 import android.util.Log;
 
+import com.lqtemple.android.lqbookreader.Configuration;
 import com.lqtemple.android.lqbookreader.DensityUtil;
 import com.lqtemple.android.lqbookreader.StaticLayoutFactory;
 import com.lqtemple.android.lqbookreader.model.Book;
@@ -26,10 +27,15 @@ public class PageCounter {
     private static final String TAG = PageCounter.class.getSimpleName();
     private final Context mContext;
     private Book mBook;
-    private final List<PageIndex> mPageIndices = new ArrayList<>();
-    private StaticLayoutFactory mStaticLayoutFactory;
     private BookView mBookView;
+
+    private final List<PageIndex> mPageIndices = new ArrayList<>();
     private SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
+
+    /**
+     * Leading margin of paragraph.
+     */
+    private int mLeadingMargin;
 
 
     public Spanned getSpannedText() {
@@ -40,34 +46,26 @@ public class PageCounter {
 
     public PageCounter(Context context) {
         mContext = context.getApplicationContext();
-        mStaticLayoutFactory = new StaticLayoutFactory();
     }
 
     public void setBookView(BookView bookView) {
         mBookView = bookView;
     }
 
-    public List<PageIndex> caculPageNumber() {
+    public List<PageIndex> calcuPageNumber() {
 
+        preCalcu();
         // TODO Paragraph style
         //TODO offset 全文本offset
         // TODO 当文字变更是重新计算
         if (!mPageIndices.isEmpty()) {
             return mPageIndices;
         }
-        int contentIndex = 0;
-        int paraIndex = 0;
 
         spannableStringBuilder.clear();
         for (List<Content> chapter : mBook.getChapters() ) {
 
             for (Content content : chapter) {
-
-                if (content.isChapterStart()) {
-
-                    paraIndex++;
-                }
-
                 int start = spannableStringBuilder.length();
                 spannableStringBuilder.append(content.getText());
                 int end = spannableStringBuilder.length();
@@ -76,7 +74,7 @@ public class PageCounter {
 
             }
 
-            cacuPageOffsetOneChapter(chapter);
+            calcuPageOffsetOneChapter(chapter);
             mSpannedChapterText.add(new SpannableString(spannableStringBuilder));
             spannableStringBuilder.clear();
         }
@@ -88,7 +86,12 @@ public class PageCounter {
 
     }
 
-    private void cacuPageOffsetOneChapter(List<Content> chapter) {
+    private void preCalcu() {
+        mLeadingMargin = (int) PagetSizeConfig.getPaint().measureText(Configuration.getInstance().getLeadingMarginText());
+        Log.d(TAG, "Leading margin : " + mLeadingMargin);
+    }
+
+    private void calcuPageOffsetOneChapter(List<Content> chapter) {
 
         int boundedWidth = (int) PagetSizeConfig.getPageWidth(mBookView.getContext());
         StaticLayout layout = StaticLayoutFactory.create(spannableStringBuilder,

@@ -19,18 +19,12 @@
 
 package com.lqtemple.android.lqbookreader.read;
 
-import android.graphics.Canvas;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.StaticLayout;
-import android.text.TextPaint;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.lqtemple.android.lqbookreader.Configuration;
-import com.lqtemple.android.lqbookreader.MyApplication;
-import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.Singleton;
 import com.lqtemple.android.lqbookreader.StaticLayoutFactory;
 import com.lqtemple.android.lqbookreader.dto.HighLight;
@@ -46,7 +40,6 @@ import java.util.List;
 import jedi.option.Option;
 
 import static android.media.CamcorderProfile.get;
-import static java.util.Collections.emptyList;
 import static jedi.option.Options.none;
 import static jedi.option.Options.option;
 import static jedi.option.Options.some;
@@ -92,7 +85,7 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 	public void initBookPages() {
 		pageCounter.setBook(bookView.getBook());
 
-		pageIndices = pageCounter.caculPageNumber();
+		pageIndices = pageCounter.calcuPageNumber();
 		text = pageCounter.getSpannedText();
 	}
 
@@ -339,7 +332,7 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 	public void loadText(Spanned text) {
 		this.text = text;
 		this.pageNum = 0;
-		this.pageIndices = pageCounter.caculPageNumber();
+		this.pageIndices = pageCounter.calcuPageNumber();
 	}
 
     @Override

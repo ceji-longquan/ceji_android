@@ -1,5 +1,7 @@
 package com.lqtemple.android.lqbookreader.model;
 
+import com.lqtemple.android.lqbookreader.Configuration;
+
 /**
  * Created by sundxing on 16/12/25.
  * 段落，包含文本索引
@@ -52,7 +54,10 @@ public class Content {
         if (mFormatText == null) {
             String text = mJContent.getText();
             if (getTypeEnum() == Type.Title) {
-                text = "\n".concat(text);
+                text = "\n".concat(text).concat("\n");
+            } else {
+                // Paragraph leading
+                text = Configuration.getInstance().getLeadingMarginText().concat(text);
             }
             if (!text.endsWith("\n")) {
                 text = text.concat("\n");
@@ -75,5 +80,9 @@ public class Content {
 
     public void setTotalOffset(int totalOffset) {
         this.totalOffset = totalOffset;
+    }
+
+    public boolean isBodyType() {
+        return getTypeEnum()== Type.Content;
     }
 }

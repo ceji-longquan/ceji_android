@@ -408,8 +408,7 @@
     <string name="first_chapter">第一章</string>
     <string name="two_chapter">第二章</string>
     <string name="thrid_chapter">第三章</string>
-
-
+    <string name="leading_paragraph">　　</string>
 
 
 </resources>
