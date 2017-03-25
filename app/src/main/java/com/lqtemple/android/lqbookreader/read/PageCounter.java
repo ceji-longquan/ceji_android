@@ -1,12 +1,21 @@
 package com.lqtemple.android.lqbookreader.read;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.style.AbsoluteSizeSpan;
+import android.text.style.DynamicDrawableSpan;
+import android.text.style.ImageSpan;
 import android.util.Log;
 
 import com.lqtemple.android.lqbookreader.Configuration;
@@ -37,6 +46,8 @@ public class PageCounter {
      */
     private int mLeadingMargin;
 
+    private Bitmap mImagePlaceHolder;
+    private float mWidth;
 
     public Spanned getSpannedText() {
         return spannableStringBuilder;
@@ -46,6 +57,9 @@ public class PageCounter {
 
     public PageCounter(Context context) {
         mContext = context.getApplicationContext();
+
+        mWidth = PagetSizeConfig.getPageWidth(mContext);
+        mImagePlaceHolder = Bitmap.createBitmap((int) mWidth, (int) (mWidth * 0.66), Bitmap.Config.RGB_565);
     }
 
     public void setBookView(BookView bookView) {
@@ -69,6 +83,17 @@ public class PageCounter {
                 int start = spannableStringBuilder.length();
                 spannableStringBuilder.append(content.getText());
                 int end = spannableStringBuilder.length();
+
+                for (String imageUrl : content.getImageUrl()) {
+                    // TODO 添加图片说明
+                    String imageDesc = "图片";
+                    spannableStringBuilder.append("Iii");
+                    spannableStringBuilder.setSpan(new ImageSpan(mContext, mImagePlaceHolder, DynamicDrawableSpan.ALIGN_BASELINE),
+                            end, end + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    spannableStringBuilder.append("\n").append(imageDesc).append("\n");
+                    end = spannableStringBuilder.length();
+                }
+
                 spannableStringBuilder.setSpan(new AbsoluteSizeSpan(getTextSize(content)),
                         start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
@@ -93,7 +118,7 @@ public class PageCounter {
 
     private void calcuPageOffsetOneChapter(List<Content> chapter) {
 
-        int boundedWidth = (int) PagetSizeConfig.getPageWidth(mBookView.getContext());
+        int boundedWidth = (int) mWidth;
         StaticLayout layout = StaticLayoutFactory.create(spannableStringBuilder,
                 PagetSizeConfig.getPaint(), boundedWidth, PagetSizeConfig.getLineSpacing());
         layout.draw(new Canvas());
@@ -177,5 +202,39 @@ public class PageCounter {
 
     public void setBook(Book book) {
         this.mBook = book;
+    }
+
+
+    private class PlaceHolderDrawable extends Drawable {
+
+        @Override
+        public int getIntrinsicHeight() {
+            return (int) PagetSizeConfig.getPageWidth(mContext);
+        }
+
+        @Override
+        public int getIntrinsicWidth() {
+            return (int) PagetSizeConfig.getPageWidth(mContext);
+        }
+
+        @Override
+        public void draw(@NonNull Canvas canvas) {
+
+        }
+
+        @Override
+        public void setAlpha(@IntRange(from = 0, to = 255) int alpha) {
+
+        }
+
+        @Override
+        public void setColorFilter(@Nullable ColorFilter colorFilter) {
+
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.TRANSLUCENT;
+        }
     }
 }

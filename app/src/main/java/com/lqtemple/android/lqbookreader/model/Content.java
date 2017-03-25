@@ -2,6 +2,8 @@ package com.lqtemple.android.lqbookreader.model;
 
 import com.lqtemple.android.lqbookreader.Configuration;
 
+import java.util.List;
+
 /**
  * Created by sundxing on 16/12/25.
  * 段落，包含文本索引
@@ -31,6 +33,14 @@ public class Content {
 
     public void setOffset(int offset) {
         mOffset = offset;
+    }
+
+    public List<String> getImageUrl() {
+        return mJContent.getImageUrl();
+    }
+
+    public int getAudioFrame() {
+        return mJContent.getAudioTimeFrame();
     }
 
     public int getParagraphIndex() {

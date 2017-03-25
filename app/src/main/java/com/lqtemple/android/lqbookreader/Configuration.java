@@ -539,7 +539,7 @@ public class Configuration {
 
 
     public float getLineSpacingMult() {
-        return settings.getFloat(KEY_LINE_SPACING_MULT, 1.2f);
+        return settings.getFloat(KEY_LINE_SPACING_MULT, 1f);
     }
 
     public boolean isKeepScreenOn() {
