@@ -61,6 +61,7 @@ import static jedi.option.Options.option;
  */
 public class Configuration {
 
+    public static final String IMAGE_TAG = "<image>" ;
     private static Configuration sInstance;
     private SharedPreferences settings;
     private Context context;

@@ -1,7 +1,11 @@
 package com.lqtemple.android.lqbookreader.model;
 
-import com.lqtemple.android.lqbookreader.Configuration;
+import android.text.Spanned;
 
+import com.lqtemple.android.lqbookreader.Configuration;
+import com.lqtemple.android.lqbookreader.read.ClickableImageSpan;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,6 +21,12 @@ public class Content {
 
     // 添加缩进和换行
     private String mFormatText;
+
+    public List<Integer> getmUrlOffset() {
+        return mUrlOffset;
+    }
+
+    private List<Integer> mUrlOffset;
 
     public Content(JContent JContent) {
         mJContent = JContent;
@@ -61,7 +71,15 @@ public class Content {
     }
 
     public CharSequence getText() {
+        format();
+        return mFormatText;
+    }
+
+    public Content format() {
+
         if (mFormatText == null) {
+            StringBuilder sb = new StringBuilder(mFormatText);
+
             String text = mJContent.getText();
             if (getTypeEnum() == Type.Title) {
                 text = "\n".concat(text).concat("\n");
@@ -71,9 +89,24 @@ public class Content {
             }
             text = text.concat("\n");
             mFormatText = text;
+            mUrlOffset = new ArrayList<>(getImageUrl().size() + 1);
+            for (String imageUrl : getImageUrl()) {
+                // TODO 添加图片说明
+                mUrlOffset.add(sb.length());
+                String imageDesc = "图片";
+                insertImage(sb, imageUrl, imageDesc);
+            }
+            mUrlOffset.add(sb.length());
         }
 
-        return mFormatText;
+        return this;
+    }
+
+    private void insertImage(StringBuilder sb, String uri, String desc) {
+        sb.append(Configuration.IMAGE_TAG);
+        sb.append(uri);
+        sb.append(Configuration.IMAGE_TAG);
+        sb.append("\n").append(desc).append("\n");
     }
 
     public boolean isChapterStart() {
@@ -92,5 +125,9 @@ public class Content {
 
     public boolean isBodyType() {
         return getTypeEnum()== Type.Content;
+    }
+
+    public int getImageTagLength(String uri) {
+        return (uri != null ? uri.length() : 0 ) + Configuration.IMAGE_TAG.length() * 2;
     }
 }

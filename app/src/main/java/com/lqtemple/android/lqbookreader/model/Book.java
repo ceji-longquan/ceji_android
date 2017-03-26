@@ -1,5 +1,9 @@
 package com.lqtemple.android.lqbookreader.model;
 
+import android.text.Spanned;
+
+import com.lqtemple.android.lqbookreader.read.ClickableImageSpan;
+
 import java.util.ArrayList;
 import java.util.List;
 
