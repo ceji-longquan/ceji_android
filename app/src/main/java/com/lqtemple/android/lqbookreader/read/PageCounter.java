@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,8 +14,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.style.AbsoluteSizeSpan;
-import android.text.style.DynamicDrawableSpan;
-import android.text.style.ImageSpan;
 import android.util.Log;
 
 import com.lqtemple.android.lqbookreader.Configuration;
@@ -41,6 +38,7 @@ public class PageCounter {
 
     private final List<PageIndex> mPageIndices = new ArrayList<>();
     private SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
+    private Bitmap mFakeBitmapForMeasure;
 
     /**
      * Leading margin of paragraph.
@@ -58,6 +56,7 @@ public class PageCounter {
     public PageCounter(Context context) {
         mContext = context.getApplicationContext();
         mWidth = PagetSizeConfig.getPageWidth(mContext);
+        mFakeBitmapForMeasure = Bitmap.createBitmap((int)mWidth, (int)(mWidth *  0.66), Bitmap.Config.RGB_565);
     }
 
     public void setBookView(BookView bookView) {
@@ -73,7 +72,6 @@ public class PageCounter {
         if (!mPageIndices.isEmpty()) {
             return mPageIndices;
         }
-        int[] fakeDrawableSize = new int[] {(int) mWidth, (int) (mWidth * 0.66)};
 
         spannableStringBuilder.clear();
         for (List<Content> chapter : mBook.getChapters() ) {
@@ -84,10 +82,12 @@ public class PageCounter {
                 int end = spannableStringBuilder.length();
 
                 List<String> urls = content.getImageUrl();
-                List<Integer> offsets = content.getmUrlOffset();
+                int[] imageStartOffsets = content.getImageStartOffsets();
+                int[] imageEndOffsets = content.getImageEndOffsets();
                 for (int i = 0; i < urls.size(); i++) {
-                    spannableStringBuilder.setSpan(new ClickableImageSpan(mContext, urls.get(i),fakeDrawableSize),
-                            offsets.get(i), offsets.get(i + 1), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    Log.d(TAG, "image add :" + imageStartOffsets[i]);
+                    spannableStringBuilder.setSpan(new ClickableImageSpan(mContext, urls.get(i), mFakeBitmapForMeasure),
+                            start + imageStartOffsets[i], start + imageEndOffsets[i], Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
 
                 spannableStringBuilder.setSpan(new AbsoluteSizeSpan(getTextSize(content)),

@@ -1,6 +1,7 @@
 package com.lqtemple.android.lqbookreader.read;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.text.TextPaint;
 
 import com.lqtemple.android.lqbookreader.Configuration;
@@ -31,5 +32,9 @@ public class PagetSizeConfig {
 
     public static TextPaint getPaint() {
         return sPaint;
+    }
+
+    public static void getFakeBitmap(int[] fakeSize) {
+        Bitmap b = Bitmap.createBitmap(fakeSize[0], fakeSize[1], Bitmap.Config.RGB_565);
     }
 }

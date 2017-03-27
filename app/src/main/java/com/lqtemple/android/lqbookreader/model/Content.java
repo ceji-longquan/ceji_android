@@ -1,11 +1,9 @@
 package com.lqtemple.android.lqbookreader.model;
 
-import android.text.Spanned;
+import android.util.Log;
 
 import com.lqtemple.android.lqbookreader.Configuration;
-import com.lqtemple.android.lqbookreader.read.ClickableImageSpan;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,19 +12,17 @@ import java.util.List;
  */
 
 public class Content {
+    private static final String TAG = "Content";
     JContent mJContent;
     private int mOffset;
     private int mParagraphIndex;
     private int totalOffset;
 
     // 添加缩进和换行
-    private String mFormatText;
+    private CharSequence mFormatText;
 
-    public List<Integer> getmUrlOffset() {
-        return mUrlOffset;
-    }
-
-    private List<Integer> mUrlOffset;
+    private int[] imageStartOffsets;
+    private int[] imageEndOffsets;
 
     public Content(JContent JContent) {
         mJContent = JContent;
@@ -78,35 +74,43 @@ public class Content {
     public Content format() {
 
         if (mFormatText == null) {
-            StringBuilder sb = new StringBuilder(mFormatText);
+            Log.d(TAG, "Format string : ");
+            StringBuilder sb = new StringBuilder();
 
-            String text = mJContent.getText();
+            final String text = mJContent.getText();
             if (getTypeEnum() == Type.Title) {
-                text = "\n".concat(text).concat("\n");
+                sb.append("\n")
+                        .append(text)
+                        .append("\n");
             } else {
                 // Paragraph leading
-                text = Configuration.getInstance().getLeadingMarginText().concat(text);
+                sb.append(Configuration.getInstance().getLeadingMarginText())
+                        .append(text)
+                        .append("\n");
             }
-            text = text.concat("\n");
-            mFormatText = text;
-            mUrlOffset = new ArrayList<>(getImageUrl().size() + 1);
+
+            // Insert image tag.
+            imageStartOffsets = new int[getImageUrl().size()];
+            imageEndOffsets = new int[imageStartOffsets.length];
+            int index = 0;
             for (String imageUrl : getImageUrl()) {
                 // TODO 添加图片说明
-                mUrlOffset.add(sb.length());
                 String imageDesc = "图片";
-                insertImage(sb, imageUrl, imageDesc);
+                imageStartOffsets[index] = sb.length();
+                Log.d(TAG, "image add :" + imageStartOffsets[index]);
+
+                sb.append(Configuration.IMAGE_TAG);
+                sb.append(imageUrl);
+                sb.append(Configuration.IMAGE_TAG);
+                imageEndOffsets[index] = sb.length();
+
+                sb.append("\n").append(imageDesc).append("\n");
+                index++;
             }
-            mUrlOffset.add(sb.length());
+            mFormatText = sb.toString();
         }
 
         return this;
-    }
-
-    private void insertImage(StringBuilder sb, String uri, String desc) {
-        sb.append(Configuration.IMAGE_TAG);
-        sb.append(uri);
-        sb.append(Configuration.IMAGE_TAG);
-        sb.append("\n").append(desc).append("\n");
     }
 
     public boolean isChapterStart() {
@@ -129,5 +133,13 @@ public class Content {
 
     public int getImageTagLength(String uri) {
         return (uri != null ? uri.length() : 0 ) + Configuration.IMAGE_TAG.length() * 2;
+    }
+
+    public int[] getImageStartOffsets() {
+        return imageStartOffsets;
+    }
+
+    public int[] getImageEndOffsets() {
+        return imageEndOffsets;
     }
 }
