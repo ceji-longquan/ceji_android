@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/title_bar"/>
+    <include
+        android:id="@+id/title"
+        layout="@layout/title_bar"/>
 
     <!--
         <LinearLayout
@@ -49,7 +52,10 @@
 
     <ListView
         android:id="@+id/listView"
+        android:layout_below="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-</LinearLayout>
+
+
+</RelativeLayout>
