@@ -1,7 +1,11 @@
 package com.lqtemple.android.lqbookreader.activity;
 
+import android.content.Intent;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -27,11 +31,14 @@ import java.util.List;
 
 
 public class DownloadManagerActivity extends BaseActivity implements View.OnClickListener, ExecutorWithListener.OnAllTaskEndListener {
+    private String  TAG = DownloadManagerActivity.class.getSimpleName();
 
     private List<DownloadInfo> allTask;
     private MyAdapter adapter;
     private DownloadManager downloadManager;
 
+    @InjectView(R.id.titleRightbtn)
+    private TextView titleRightbtn;
 
     @InjectView(R.id.listView)
     ListView listView;
@@ -46,9 +53,11 @@ public class DownloadManagerActivity extends BaseActivity implements View.OnClic
         allTask = downloadManager.getAllTask();
         adapter = new MyAdapter();
         listView.setAdapter(adapter);
+        titleRightbtn.setOnClickListener(this);
 
         downloadManager.getThreadPool().getExecutor().addOnAllTaskEndListener(this);
     }
+
 
     @Override
     public void onAllTaskEnd() {
@@ -90,6 +99,13 @@ public class DownloadManagerActivity extends BaseActivity implements View.OnClic
                 downloadManager.startAllTask();
                 break;
         }*/
+
+        switch (v.getId()) {
+            case R.id.titleRightbtn:
+            startActivity(new Intent(getApplicationContext(),MusicPlayerActivity.class));
+                break;
+        }
+
     }
 
     private class MyAdapter extends BaseAdapter {
@@ -246,7 +262,18 @@ public class DownloadManagerActivity extends BaseActivity implements View.OnClic
 
         @Override
         public void onFinish(DownloadInfo downloadInfo) {
+//            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse(LqBookConst.DOWN_PATH)));
+
             Toast.makeText(DownloadManagerActivity.this, getString(R.string.downLoaded) + downloadInfo.getTargetPath(), Toast.LENGTH_SHORT).show();
+
+            MediaScannerConnection.scanFile(getApplicationContext() ,
+                    new String[]{downloadInfo.getTargetPath()}, null,
+                    new MediaScannerConnection.OnScanCompletedListener() {
+                        public void onScanCompleted(String path, Uri uri) {
+                            Log.i("ExternalStorage", "Scanned " + path + ":");
+                            Log.i("ExternalStorage", "-> uri=" + uri);
+                        }
+                    });
         }
 
         @Override

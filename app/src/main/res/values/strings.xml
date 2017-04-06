@@ -379,6 +379,14 @@
     <string name="default_book_title" translatable="false">Title of the book</string>
     <string name="hello_world" translatable="false">Hello world!</string>
 
+    <!--播放器-->
+    <string name="currently_playing_song">Song currently playing</string>
+    <string name="currently_playing_artist">Artist of currently playing song</string>
+    <string name="currently_playing_extra_info">Extra info for currently playing song</string>
+    <string name="play_pause">play or pause</string>
+    <string name="casting_to_device">Casting to %1$s</string>
+
+
     <string name="menu_title1" >新闻</string>
     <string name="open" >打开</string>
     <string name="close" >关闭</string>
@@ -408,6 +416,14 @@
     <string name="first_chapter">第一章</string>
     <string name="two_chapter">第二章</string>
     <string name="thrid_chapter">第三章</string>
+
+    <string name="storage_permission">存储权限不可用</string>
+    <string name="storage_permission_messahe">无法进行下载</string>
+    <string name="now_open">立即开启</string>
+    <string name="now_cancle">取消</string>
+    <string name="current_play">正在播放</string>
+    <string name="select_yinpin">请选择播放的音频文件</string>
+
     <string name="leading_paragraph">　　</string>
     <string name="chapter_list">目录</string>
     <string name="bookmark">书签</string>

@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lqtemple.android.lqbookreader">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -9,6 +11,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,6 +49,24 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:singleUser="true"
             />
+
+        <activity
+            android:name=".activity.MusicPlayerActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:singleUser="true"
+            />
+
+
+        <service
+            android:name="com.lqtemple.android.lqbookreader.service.MusicPlayerService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter >
+                <action android:name="com.lqtemple.android.lqbookreader.service.MusicPlayerService.player"></action>
+            </intent-filter>
+        </service>
     </application>
 
 
