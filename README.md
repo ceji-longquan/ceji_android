@@ -4,9 +4,8 @@
  [OkGo](https://github.com/jeasonlzy/okhttp-OkGo)
 
 
-- 代码
-https://github.com/ceji-longquan
 
+## 资料
 - 文档
 http://www.kancloud.cn/cejiapp/yanfa/
 
