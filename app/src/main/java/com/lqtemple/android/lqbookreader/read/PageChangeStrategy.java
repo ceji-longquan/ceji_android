@@ -26,6 +26,8 @@ public interface PageChangeStrategy {
 
 	void initBookPages();
 
+	PageCounter getPageCounter();
+
 	/**
 	 * Loads the given section of text.
 	 * 

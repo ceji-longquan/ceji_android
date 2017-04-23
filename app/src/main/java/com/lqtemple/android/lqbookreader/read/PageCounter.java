@@ -147,7 +147,7 @@ public class PageCounter {
             if (pageEnd > pageStartOffset) {
                 if (spannableStringBuilder.subSequence(pageStartOffset, pageEnd).toString().trim().length() > 0) {
                     PageIndex pageIndex = findPageIndexByOffset(chapter, pageStartOffset);
-                    Log.d(TAG, "add pageIndex :" + pageIndex.getParaIndex());
+                    Log.d(TAG, "add pageIndex :" + pageIndex.getIndex());
 
                     mPageIndices.add(pageIndex);
                 }
@@ -163,7 +163,7 @@ public class PageCounter {
             if (pageStartOffset < contentOffset) continue;
             if (pageStartOffset - contentOffset < content.getText().length()) {
                 PageIndex pageIndex = new PageIndex();
-                pageIndex.setParaIndex(content.getIndex());
+                pageIndex.setIndex(content.getIndex());
                 pageIndex.setOffset(pageStartOffset - contentOffset);
                 int totalOffset = pageStartOffset - contentOffset + content.getTotalOffset();
                 pageIndex.setTotalOffset(totalOffset);
@@ -198,6 +198,16 @@ public class PageCounter {
 
     public void setBook(Book book) {
         this.mBook = book;
+    }
+
+    public int getPageNumberFor(int offset) {
+        int total = mPageIndices.size() - 1;
+        for (int i = 0; i < total; i++) {
+            if (mPageIndices.get(i).getTotalOffset() <= offset && mPageIndices.get(i + 1).getTotalOffset() >= offset) {
+                return i + 1;
+            }
+        }
+        return -1;
     }
 
 

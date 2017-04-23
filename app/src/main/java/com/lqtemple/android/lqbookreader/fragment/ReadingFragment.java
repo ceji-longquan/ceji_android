@@ -334,6 +334,16 @@ public class ReadingFragment extends Fragment implements
 
         this.bookView.addListener(this);
 //        this.bookView.setTextSelectionCallback(this);
+        view.findViewById(R.id.nav_drawer).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ReadingActivity activity = (ReadingActivity) getActivity();
+                activity.showChapter();
+
+                // Hide status bar to show drawer totally.
+                onScreenTap();
+            }
+        });
     }
 
 
@@ -556,6 +566,10 @@ public class ReadingFragment extends Fragment implements
         pageNumberView.setText(pageString);
         pageNumberView.setGravity(Gravity.CENTER);
         pageNumberView.invalidate();
+    }
+
+    public Book getBook() {
+        return bookView.getBook();
     }
 
     private void updateFromPrefs() {
@@ -1352,6 +1366,7 @@ public class ReadingFragment extends Fragment implements
         }
 
         this.pageNumberView.setVisibility(View.VISIBLE);
+
         bookView.setKeepScreenOn(false);
     }
 

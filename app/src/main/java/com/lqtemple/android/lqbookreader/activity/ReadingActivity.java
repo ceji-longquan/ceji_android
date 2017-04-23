@@ -21,20 +21,30 @@ package com.lqtemple.android.lqbookreader.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.lqtemple.android.lqbookreader.Configuration;
 import com.lqtemple.android.lqbookreader.MyApplication;
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.fragment.ReadingFragment;
+import com.lqtemple.android.lqbookreader.model.Book;
+import com.lqtemple.android.lqbookreader.model.Content;
+import com.lqtemple.android.lqbookreader.read.BookView;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReadingActivity extends AppCompatActivity {
 
@@ -46,6 +56,8 @@ public class ReadingActivity extends AppCompatActivity {
             .getLogger("ReadingActivity");
 
     private int searchIndex = -1;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
 
     protected int getMainLayoutResource() {
         return R.layout.activity_reading;
@@ -53,15 +65,67 @@ public class ReadingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         Configuration config = Configuration.getInstance();
         MyApplication.changeLanguageSetting(this, config);
 
-
         setTheme( getTheme(config) );
-        super.onCreate(savedInstanceState);
         setContentView(getMainLayoutResource());
 
+        initLayoutDrawer();
+
+    }
+
+    private void initLayoutDrawer() {
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         readingFragment = (ReadingFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_reading);
+
+        mDrawerList = (ListView) findViewById(R.id.left_drawer_list);
+        // set a custom shadow that overlays the main content when the drawer opens
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        // set up the drawer's list view with items and click listener
+
+    }
+
+    public void showChapter() {
+        // TODO init draw tab
+        ViewGroup drawerTabs = (ViewGroup) findViewById(R.id.drawer_tab);
+        drawerTabs.getChildAt(0).setSelected(true);
+
+        Book book = readingFragment.getBook();
+        BookView bookView = readingFragment.getBookView();
+
+        List<List<Content>> chapters = book.getChapters();
+        List<CharSequence> chapterStr = new ArrayList<>();
+        for (List<Content> contents : chapters) {
+            Content firstContent = contents.get(0);
+            int pageNumber = bookView.getPageNumberFor(firstContent);
+
+            chapterStr.add(firstContent.getText() + " --- " + pageNumber);
+        }
+        mDrawerList.setAdapter(new ArrayAdapter<>(this,
+                R.layout.drawer_list_item, chapterStr));
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        mDrawerLayout.openDrawer(GravityCompat.START, true);
+    }
+
+    /* The click listner for ListView in the navigation drawer */
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            clickItem(position);
+        }
+    }
+
+    private void clickItem(int position) {
+
+        // TODO jump to target page index
+
+        // update selected item and title, then close the drawer
+        mDrawerList.setItemChecked(position, true);
+        mDrawerLayout.closeDrawer(GravityCompat.START, true);
     }
 
     protected int getTheme(Configuration config) {

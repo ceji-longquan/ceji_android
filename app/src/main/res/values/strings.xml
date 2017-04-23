@@ -409,6 +409,9 @@
     <string name="two_chapter">第二章</string>
     <string name="thrid_chapter">第三章</string>
     <string name="leading_paragraph">　　</string>
+    <string name="chapter_list">目录</string>
+    <string name="bookmark">书签</string>
+    <string name="book_note">笔记</string>
 
 
 </resources>

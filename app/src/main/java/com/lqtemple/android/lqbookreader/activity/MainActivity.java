@@ -19,14 +19,11 @@ import android.widget.TextView;
 import com.lqtemple.android.lqbookreader.FileUtils;
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.activity.adapter.LeftMenuAdapter;
-import com.lqtemple.android.lqbookreader.model.Book;
 import com.lqtemple.android.lqbookreader.model.LeftMenu;
-import com.lqtemple.android.lqbookreader.model.Spine;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -42,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList mRightArrayList;
     private ListView leftListView;
 
-    private Book book;
     private File target;
 
     @Override
@@ -157,14 +153,6 @@ public class MainActivity extends AppCompatActivity {
         mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
     }
 
-    private void initBookSpine() {
-        Spine bookSpine = new Spine(book);
-    }
-
-    private void countPage() {
-        List contents = book.getJContent();
-
-    }
 
     public void onStartRead(View v) {
         Intent i = new Intent(this, ReadingActivity.class);

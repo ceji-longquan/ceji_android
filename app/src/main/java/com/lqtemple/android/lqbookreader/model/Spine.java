@@ -36,7 +36,7 @@ public class Spine implements Iterable<Spine.SpineEntry>{
 
     public Spine(Book book) {
         this();
-        // 生成目录
+        // 生成目录 TODO entry
         for (JContent content : book.getJContent()) {
             String index = content.getIndex();
             if (index.endsWith("0") && content.getType() == Type.Title.ordinal()) {

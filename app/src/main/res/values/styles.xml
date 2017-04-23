@@ -27,4 +27,10 @@
 
     <!--用于控制toolbar溢出菜单的样式-->
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
+    <style name="drawer_tab">
+        <item name="android:lines">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
 </resources>

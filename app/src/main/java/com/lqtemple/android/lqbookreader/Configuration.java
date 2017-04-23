@@ -365,6 +365,7 @@ public class Configuration {
         return context.getSharedPreferences(bookHash, 0);
     }
 
+    @Deprecated
     public Option<List<List<Integer>>> getPageOffsets(String fileName) {
 
         SharedPreferences bookPrefs = getPrefsForBook(fileName);

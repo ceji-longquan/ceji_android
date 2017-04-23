@@ -62,7 +62,10 @@ public class ScrollingStrategy implements PageChangeStrategy {
 		this.bookView = bookView;
 		this.childView = bookView.getInnerView();
 	}
-	
+	@Override
+	public PageCounter getPageCounter() {
+		return null;
+	}
 	@Override
 	public Option<CharSequence> getNextPageText() { return none(); }
 	

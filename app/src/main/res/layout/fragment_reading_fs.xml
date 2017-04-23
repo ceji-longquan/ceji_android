@@ -87,7 +87,39 @@
         	android:layout_width="fill_parent"        	
         	android:layout_height="wrap_content"        
         	android:layout_below="@id/percentageField"        	        	
-			android:background="@color/translucent_black" />   
+			android:background="@color/translucent_black" />
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:orientation="horizontal"
+				android:layout_below="@id/titleProgress"
+				android:background="@color/translucent_black"
+				android:layout_height="48dp">
+				<ImageView
+					android:id="@+id/nav_drawer"
+					android:padding="8dp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:src="@android:drawable/ic_menu_manage"
+					/>
+				<ImageView
+					android:padding="8dp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:src="@android:drawable/ic_menu_manage"
+					/>
+				<ImageView
+					android:padding="8dp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:src="@android:drawable/ic_menu_manage"
+					/>
+				<ImageView
+					android:padding="8dp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:src="@android:drawable/ic_menu_manage"
+					/>
+			</LinearLayout>
   </RelativeLayout>
 
   <include layout="@layout/media_player_bar" />

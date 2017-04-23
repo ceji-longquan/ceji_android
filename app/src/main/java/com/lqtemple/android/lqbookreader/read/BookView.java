@@ -12,6 +12,7 @@ import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ClickableSpan;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -21,6 +22,7 @@ import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.Singleton;
 import com.lqtemple.android.lqbookreader.dto.HighLight;
 import com.lqtemple.android.lqbookreader.model.Book;
+import com.lqtemple.android.lqbookreader.model.Content;
 import com.lqtemple.android.lqbookreader.model.Spine;
 
 import org.slf4j.Logger;
@@ -48,6 +50,8 @@ import static jedi.option.Options.some;
  * Created by sundxing on 16/12/4.
  */
 public class BookView extends ScrollView{
+
+    public static final String TAG = "BookView";
     private static final Logger LOG = LoggerFactory.getLogger("BookView");
 
     private int storedIndex;
@@ -373,34 +377,46 @@ public class BookView extends ScrollView{
         }
     }
 
+    /**
+     * This call before page number change!
+     */
     private void progressUpdate() {
 
-        if ( this.spine == null ) {
+        if (this.strategy == null) {
             return;
         }
+        int progress = getCurrentProgress();
+        // Start at 0
+        int pageNumber = getCurrentPageNum() + 1;
+        for (BookViewListener listener : this.listeners) {
+            listener.progressUpdate(progress, pageNumber,
+                    getTotalPageNum());
+        }
 
-        this.strategy.getText().filter( t -> t.length() > 0 ).forEach((Command<? super Spanned>) text -> {
+    }
 
-            double progressInPart = (double) this.getProgressPosition()
-                    / (double) text.length();
+    private int getTotalPageNum() {
+        if (strategy instanceof FixedPagesStrategy) {
+            return ((FixedPagesStrategy) strategy).getTotalPageNum();
+        } {
+            return 0;
+        }
+    }
 
-            if (text.length() > 0 && strategy.isAtEnd()) {
-                progressInPart = 1d;
-            }
+    private int getCurrentProgress() {
+        if (strategy instanceof FixedPagesStrategy) {
+            return ((FixedPagesStrategy) strategy).getCurrentProgressPercent();
+        } {
+            return 0;
+        }
+    }
 
-            int progress = spine.getProgressPercentage(progressInPart);
-
-            if (progress != -1) {
-
-                int pageNumber = getPageNumberFor(getIndex(),
-                        getProgressPosition());
-
-                for (BookViewListener listener : this.listeners) {
-                    listener.progressUpdate(progress, pageNumber,
-                            spine.getTotalNumberOfPages());
-                }
-            }
-        });
+    private int getCurrentPageNum() {
+        if (strategy instanceof FixedPagesStrategy) {
+            return ((FixedPagesStrategy) strategy).getCurrentPage();
+        } {
+            return 0;
+        }
     }
 
     public int getTotalNumberOfPages() {
@@ -419,6 +435,16 @@ public class BookView extends ScrollView{
         return -1;
     }
 
+    public int getPageNumberFor(Content content) {
+        int offset = content.getTotalOffset();
+        PageCounter pageCounter = strategy.getPageCounter();
+        int number =  pageCounter.getPageNumberFor(offset);
+
+        Log.d(TAG, " Get Content[" + content.getIndex() + ", offset = " + offset +"] ----> number : " + number);
+        return number;
+    }
+
+    @Deprecated
     public int getPageNumberFor( int index, int position ) {
 
         if ( spine == null ) {
@@ -742,7 +768,7 @@ public class BookView extends ScrollView{
         return childView;
     }
 
-    Spine getSpine() {
+    public Spine getSpine() {
         return this.spine;
     }
 

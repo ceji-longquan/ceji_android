@@ -39,7 +39,6 @@ import java.util.List;
 
 import jedi.option.Option;
 
-import static android.media.CamcorderProfile.get;
 import static jedi.option.Options.none;
 import static jedi.option.Options.option;
 import static jedi.option.Options.some;
@@ -81,6 +80,7 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 
 	}
 
+
 	@Override
 	public void initBookPages() {
 		pageCounter.setBook(bookView.getBook());
@@ -113,7 +113,24 @@ public class FixedPagesStrategy implements PageChangeStrategy {
 		this.childView.setText(text);
 		this.pageIndices = new ArrayList<>();
 	}
-	
+
+	@Override
+	public PageCounter getPageCounter() {
+		return pageCounter;
+	}
+
+	public int getCurrentProgressPercent() {
+
+		PageIndex pageIndex = pageIndices.get(pageNum);
+		int progress = (int) ((pageIndex.getTotalOffset() * 100L) / pageIndices.get(pageIndices.size() - 1).getTotalOffset());
+
+		return progress;
+	}
+
+	public int getTotalPageNum() {
+		return pageIndices.size();
+	}
+
 	/**
 	 * Returns the current page INSIDE THE SECTION.
 	 * 
