@@ -58,6 +58,13 @@
             android:singleUser="true"
             />
 
+        <activity
+            android:name=".activity.FullScreenPlayerActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:singleUser="true"
+            />
 
         <service
             android:name="com.lqtemple.android.lqbookreader.service.MusicPlayerService"

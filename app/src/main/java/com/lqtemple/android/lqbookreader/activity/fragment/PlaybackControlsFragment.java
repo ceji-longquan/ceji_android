@@ -30,7 +30,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lqtemple.android.lqbookreader.R;
-import com.lqtemple.android.lqbookreader.activity.FullScreenPlayerActivity;
 import com.lqtemple.android.lqbookreader.event.MusicEvent;
 import com.lqtemple.android.lqbookreader.event.StartPlayEvent;
 import com.lqtemple.android.lqbookreader.model.MusicPlayInfo;
@@ -84,7 +83,7 @@ public class PlaybackControlsFragment extends Fragment {
         mAlbumArt = (ImageView) rootView.findViewById(R.id.album_art);
         init();
 
-        rootView.setOnClickListener(new View.OnClickListener() {
+        /*rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), FullScreenPlayerActivity.class);
@@ -96,9 +95,9 @@ public class PlaybackControlsFragment extends Fragment {
                 //                    intent.putExtra(MusicPlayerActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION,
                 //                        metadata.getDescription());
                 //                }
-                //                startActivity(intent);
+                                startActivity(intent);
             }
-        });
+        });*/
         return rootView;
     }
 
