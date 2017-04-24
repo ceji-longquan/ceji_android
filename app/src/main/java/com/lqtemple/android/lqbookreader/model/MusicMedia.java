@@ -15,6 +15,7 @@ public class MusicMedia implements Serializable{
     private String size;
     private int albumId;
     private String album;
+    private int duration;
 
     public int getId() {
         return id;
@@ -48,6 +49,15 @@ public class MusicMedia implements Serializable{
         this.url = url;
     }
 
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
     public String getTime() {
         return time;
     }
@@ -61,6 +71,8 @@ public class MusicMedia implements Serializable{
         minute %= 60;
         this.time = String.format("%02d:%02d", minute, second);
     }
+
+
 
     public String getSize() {
         return size;
