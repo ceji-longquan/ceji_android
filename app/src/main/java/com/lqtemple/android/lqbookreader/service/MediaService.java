@@ -3,6 +3,8 @@ package com.lqtemple.android.lqbookreader.service;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -13,11 +15,15 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.SystemClock;
+import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.activity.FullScreenPlayerActivity;
 import com.lqtemple.android.lqbookreader.model.MusicMedia;
+import com.lqtemple.android.lqbookreader.util.CommonUtils;
 import com.lqtemple.android.lqbookreader.util.ConstantValue;
 import com.lqtemple.android.lqbookreader.util.HandlerManager;
 import com.lqtemple.android.lqbookreader.util.LqBookConst;
@@ -27,6 +33,7 @@ import com.lqtemple.android.lqbookreader.util.PromptManager;
 public class MediaService extends Service implements OnCompletionListener, OnSeekCompleteListener, OnErrorListener {
 	private  final String TAG = "MediaService";
 	private static final int NOTIFICATION_ID = 1; // 如果id设置为0,会导致不能设置为前台service
+	public static Context mContext;
 	// mediaplayer
 	private static MediaPlayer player;
 	// private static ProgressThread thread;
@@ -35,10 +42,15 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 	private int postion = 0;
 	public static int default_postion = 0;
 	public static boolean isPlaying = false;
+	public static final String TOGGLEPAUSE_ACTION = "com.lqtemple.android.lqbookreader.togglepause";
+	public static final String NEXT_ACTION = "com.lqtemple.android.lqbookreader.next";
+	public static final String STOP_ACTION = "com.lqtemple.android.lqbookreader.stop";
+
 
 	private MusicMedia mMusicMedia;
 
-
+	private Notification mNotification;
+	private long mNotificationPostTime =0;
 	// private Handler handler;
 
 	@Override
@@ -48,6 +60,8 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 
 	@Override
 	public void onCreate() {
+		mContext = this;
+
 		super.onCreate();
 		if (player == null) {
 			player = new MediaPlayer();
@@ -112,9 +126,8 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 
 		if(mMusicMedia!=null){
 			//开启前台service
-			Notification notification = null;
 			if (Build.VERSION.SDK_INT < 16) {
-				notification = new Notification.Builder(this)
+				mNotification = new Notification.Builder(this)
 						.setContentTitle(mMusicMedia.getTitle()).setContentText(mMusicMedia.getArtist())
 						.setSmallIcon(R.drawable.musicfile).getNotification();
 			} else {
@@ -127,10 +140,11 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 				//        builder.setTicker("Foreground Service Start");
 				builder.setContentTitle(mMusicMedia.getTitle());
 				builder.setContentText(mMusicMedia.getArtist());
-				notification = builder.build();
+				mNotification = builder.build();
+				mNotification = getNotification(mMusicMedia);
 			}
 
-			startForeground(NOTIFICATION_ID, notification);
+			startForeground(NOTIFICATION_ID, mNotification);
 		}
 
 
@@ -249,4 +263,70 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 		return false;
 	}
 
+
+
+	private Notification getNotification(MusicMedia musicMedia) {
+		RemoteViews remoteViews;
+		final int PAUSE_FLAG = 0x1;
+		final int NEXT_FLAG = 0x2;
+		final int STOP_FLAG = 0x3;
+		final String albumName = musicMedia.getAlbum();
+		final String artistName = musicMedia.getArtist();
+		final boolean isPlaying = isPlaying();
+
+		remoteViews = new RemoteViews(this.getPackageName(), R.layout.notification);
+		String text = TextUtils.isEmpty(albumName) ? artistName : artistName + " - " + albumName;
+		remoteViews.setTextViewText(R.id.title, musicMedia.getTitle());
+		remoteViews.setTextViewText(R.id.text, text);
+
+		//此处action不能是一样的 如果一样的 接受的flag参数只是第一个设置的值
+		Intent pauseIntent = new Intent(TOGGLEPAUSE_ACTION);
+		pauseIntent.putExtra("FLAG", PAUSE_FLAG);
+		PendingIntent pausePIntent = PendingIntent.getBroadcast(this, 0, pauseIntent, 0);
+		remoteViews.setImageViewResource(R.id.iv_pause, isPlaying ? R.drawable.note_btn_pause : R.drawable.note_btn_play);
+		remoteViews.setOnClickPendingIntent(R.id.iv_pause, pausePIntent);
+
+		Intent nextIntent = new Intent(NEXT_ACTION);
+		nextIntent.putExtra("FLAG", NEXT_FLAG);
+		PendingIntent nextPIntent = PendingIntent.getBroadcast(this, 0, nextIntent, 0);
+		remoteViews.setOnClickPendingIntent(R.id.iv_next, nextPIntent);
+
+		Intent preIntent = new Intent(STOP_ACTION);
+		preIntent.putExtra("FLAG", STOP_FLAG);
+		PendingIntent prePIntent = PendingIntent.getBroadcast(this, 0, preIntent, 0);
+		remoteViews.setOnClickPendingIntent(R.id.iv_stop, prePIntent);
+
+		//        PendingIntent pendingIntent = PendingIntent.getActivity(this.getApplicationContext(), 0,
+		//                new Intent(this.getApplicationContext(), PlayingActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+		final Intent nowPlayingIntent = new Intent();
+		//nowPlayingIntent.setAction("com.wm.remusic.LAUNCH_NOW_PLAYING_ACTION");
+		nowPlayingIntent.setComponent(new ComponentName("com.wm.remusic","com.wm.remusic.activity.PlayingActivity"));
+		nowPlayingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		PendingIntent clickIntent = PendingIntent.getBroadcast(this, 0, nowPlayingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent click = PendingIntent.getActivity(this,0,nowPlayingIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+		if (mNotificationPostTime == 0) {
+			mNotificationPostTime = System.currentTimeMillis();
+		}
+
+		if(mNotification == null){
+			NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setContent(remoteViews)
+					.setSmallIcon(R.drawable.ic_notification)
+					.setContentIntent(click)
+					.setWhen(mNotificationPostTime);
+			if (CommonUtils.isJellyBeanMR1()) {
+				builder.setShowWhen(false);
+			}
+			mNotification = builder.build();
+		}else {
+			mNotification.contentView = remoteViews;
+		}
+
+		return mNotification;
+	}
+
+
+	public boolean isPlaying() {
+		return isPlaying;
+	}
 }

@@ -128,11 +128,12 @@ public class FullScreenPlayerActivity extends BaseActivity{
             }
         });
         int position = getIntent().getIntExtra("position",-1);
-        MusicMedia music = (MusicMedia) getIntent().getSerializableExtra("music");
-        Log.i(TAG,"MediaUtil.PLAYSTATE =" + MediaUtil.PLAYSTATE);
-        Log.i(TAG,"MediaUtil.LAST_POS =" + MediaUtil.LAST_POS);
-        Log.i(TAG,"position =" + position);
-        if(MediaUtil.LAST_POS == position ){
+        MusicMedia music = MediaUtil.getInstacen().getCurrent();
+//        MusicMedia music = (MusicMedia) getIntent().getSerializableExtra("music");
+//        Log.i(TAG,"MediaUtil.PLAYSTATE =" + MediaUtil.PLAYSTATE);
+//        Log.i(TAG,"MediaUtil.LAST_POS =" + MediaUtil.LAST_POS);
+//        Log.i(TAG,"position =" + position);
+        if(MediaUtil.LAST_POS == position && music!=null){
             startSeekBarPlayService(music, LqBookConst.DEFAULT_PROGRESS,ConstantValue.OPTION_DEFAULT);
             music_duration_played.setText(LqBookConst.toTime(MediaService.default_postion));
             play_seek.setMax(music.getDuration());

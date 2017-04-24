@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.activity.FullScreenPlayerActivity;
+import com.lqtemple.android.lqbookreader.event.AgainPlayEvent;
 import com.lqtemple.android.lqbookreader.event.MusicEvent;
 import com.lqtemple.android.lqbookreader.event.UpdateListColorEvent;
 import com.lqtemple.android.lqbookreader.model.MusicMedia;
@@ -45,6 +46,7 @@ import com.lqtemple.android.lqbookreader.util.MediaUtil;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.lqtemple.android.lqbookreader.service.MediaService.mContext;
 import static com.lqtemple.android.lqbookreader.util.MediaUtil.getInstacen;
 
 
@@ -104,14 +106,12 @@ public class PlaybackControlsFragment extends Fragment {
                     break;
                 case ConstantValue.SEEKBAR_CHANGE:
                     // 根据播放时长改变SeekBar
-                    int arg1 = msg.arg1;
-                    int arg2 = msg.arg2;
-                    Log.i(TAG, "PlaybackControlsFragment.arg2 =" + arg2);
-                    mSubtitle.setText(LqBookConst.toTime(arg1));
-                    audioSeekBar.setMax(arg2);
-                    audioSeekBar.setProgress(arg1);
+                    Log.i(TAG, "PlaybackControlsFragment.arg2 =" + msg.arg2);
+                    mSubtitle.setText(LqBookConst.toTime(msg.arg1));
+                    audioSeekBar.setMax(msg.arg2);
+                    audioSeekBar.setProgress(msg.arg1);
                     //
-                    mExtraInfo.setText(LqBookConst.toTime(arg2));
+                    mExtraInfo.setText(LqBookConst.toTime(msg.arg2));
 
                     break;
             }
@@ -174,20 +174,27 @@ public class PlaybackControlsFragment extends Fragment {
         super.onResume();
         HandlerManager.putHandler(handler);
         LogHelper.d(TAG, "MediaUtil.CURRENTPOS=" + MediaUtil.CURRENTPOS);
-        LogHelper.d(TAG, "MediaUtil.CURRENTPOS=" + MediaUtil.CURRENTPOS);
+        LogHelper.d(TAG, "MediaUtil.size=" + MediaUtil.getInstacen().getSongList().size());
+        if(MediaUtil.getInstacen().getSongList().size()>0){
+            if (MediaUtil.CURRENTPOS >= 0 && MediaUtil.CURRENTPOS<=MediaUtil.getInstacen().getSongList().size() ) {
+                MusicMedia music = MediaUtil.getInstacen().getCurrent();
+                if (music != null) {
+                    mTitle.setText(music.getTitle());
+                    mSubtitle.setText(LqBookConst.toTime(MediaService.default_postion));
+                    audioSeekBar.setMax(music.getDuration());
+                    audioSeekBar.setProgress(MediaService.default_postion);
+                    //
+                    mExtraInfo.setText(LqBookConst.toTime(music.getDuration()));
 
-        if (MediaUtil.CURRENTPOS >= 0 && MediaUtil.CURRENTPOS < MediaUtil.getInstacen().getSongList().size()) {
-            MusicMedia musicMedia = MediaUtil.getInstacen().getSongList().get(MediaUtil.CURRENTPOS);
-            if (musicMedia != null) {
-                mTitle.setText(musicMedia.getTitle());
-                if (MediaService.isPlaying) {
-                    mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
-                } else {
-                    mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
                 }
             }
         }
 
+        if (MediaService.isPlaying) {
+            mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
+        } else {
+            mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
+        }
 
     }
 
@@ -214,19 +221,35 @@ public class PlaybackControlsFragment extends Fragment {
 
 
     private void startSeekBarPlayService(MusicMedia music, int progress, int option) {
-        Intent intent = new Intent(getActivity().getApplicationContext(), MediaService.class);
-        if (music != null) {
-            intent.putExtra("music", music);
-            intent.putExtra("file", music.getUrl());
+        try {
+            if(mContext!=null){
+                Intent intent = new Intent(mContext, MediaService.class);
+                if (music != null) {
+                    intent.putExtra("music", music);
+                    intent.putExtra("file", music.getUrl());
+                }
+                intent.putExtra("option", option);
+                intent.putExtra("progress", progress);
+                mContext.startService(intent);
+            }else{
+                Intent intent = new Intent(getActivity().getApplicationContext(), MediaService.class);
+                if (music != null) {
+                    intent.putExtra("music", music);
+                    intent.putExtra("file", music.getUrl());
+                }
+                intent.putExtra("option", option);
+                intent.putExtra("progress", progress);
+                getActivity().getApplicationContext().startService(intent);
+            }
 
-        }
-        intent.putExtra("option", option);
-        intent.putExtra("progress", progress);
-        getActivity().getApplicationContext().startService(intent);
-        if (MediaService.isPlaying) {
-            mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
-        } else {
-            mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
+
+            if (MediaService.isPlaying) {
+                mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
+            } else {
+                mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -242,6 +265,18 @@ public class PlaybackControlsFragment extends Fragment {
     }
 
 
+    @Subscribe
+    public void onMessageEvent(AgainPlayEvent event) {
+        MusicMedia musicPlayInfo = event.message;
+        audioSeekBar.setMax(musicPlayInfo.getDuration());
+        mTitle.setText(musicPlayInfo.getTitle());
+        startSeekBarPlayService(null, LqBookConst.DEFAULT_PROGRESS, ConstantValue.OPTION_DEFAULT);
+        if (MediaService.isPlaying) {
+            mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
+        } else {
+            mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
+        }
+    }
 
     private void init() {
 

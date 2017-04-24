@@ -10,5 +10,7 @@
 
     <color name="titleBar">#EBF5fF</color>
     <color name="white">#ffffff</color>
+    <color name="bottom_text">#c1c0c0</color>
+    <color name="notification_bak">#47fafafa</color>
 
 </resources>

@@ -18,8 +18,8 @@ import com.lqtemple.android.lqbookreader.util.LogHelper;
  */
 
 public class BasePlayActivity extends AppCompatActivity {
-    private static final String TAG = LogHelper.makeLogTag(BasePlayActivity.class);
-
+    private  final String TAG = LogHelper.makeLogTag(BasePlayActivity.class);
+    protected  boolean isShow = false;
     private PlaybackControlsFragment mControlsFragment;
 
     @Override
@@ -37,35 +37,33 @@ public class BasePlayActivity extends AppCompatActivity {
         if (mControlsFragment == null) {
             throw new IllegalStateException("Mising fragment with id 'controls'. Cannot continue.");
         }
-        showQuickControl(true);
+        showQuickControl();
     }
 
 
     protected void hidePlaybackControls() {
         LogHelper.d(TAG, "hidePlaybackControls");
-        getFragmentManager().beginTransaction()
-                .hide(mControlsFragment)
-                .commit();
+        if (mControlsFragment != null){
+            getFragmentManager().beginTransaction()
+                    .hide(mControlsFragment)
+                    .commit();
+         }
+        isShow = false;
     }
 
     /**
-     * @param show 显示或关闭底部播放控制栏
+     * 显示或关闭底部播放控制栏
      */
-    protected void showQuickControl(boolean show) {
-        if (show) {
-            if (mControlsFragment == null) {
-                mControlsFragment = (PlaybackControlsFragment) getFragmentManager().findFragmentById(R.id.fragment_playback_controls);
-            } else {
-                getFragmentManager().beginTransaction()
-                        .show(mControlsFragment)
-                        .commit();
-            }
+    protected void showQuickControl() {
+        if (mControlsFragment == null) {
+            mControlsFragment = (PlaybackControlsFragment) getFragmentManager().findFragmentById(R.id.fragment_playback_controls);
         } else {
-            if (mControlsFragment != null)
-                getFragmentManager().beginTransaction()
-                        .hide(mControlsFragment)
-                        .commit();
+            getFragmentManager().beginTransaction()
+                    .show(mControlsFragment)
+                    .commit();
         }
+
+        isShow = true;
     }
 
 

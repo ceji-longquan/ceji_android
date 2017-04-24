@@ -2,16 +2,20 @@ package com.lqtemple.android.lqbookreader.activity;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.activity.adapter.MySongListAdapter;
 import com.lqtemple.android.lqbookreader.annotation.InjectUtils;
 import com.lqtemple.android.lqbookreader.annotation.InjectView;
+import com.lqtemple.android.lqbookreader.event.AgainPlayEvent;
 import com.lqtemple.android.lqbookreader.event.MusicEvent;
 import com.lqtemple.android.lqbookreader.event.UpdateListColorEvent;
+import com.lqtemple.android.lqbookreader.util.LqBookConst;
 import com.lqtemple.android.lqbookreader.util.MediaUtil;
 import com.lqtemple.android.lqbookreader.util.PromptManager;
 
@@ -29,6 +33,9 @@ public class MusicPlayerActivity extends BasePlayActivity {
     private ListView musicListView;
     private MySongListAdapter adapter;
 
+    @InjectView(R.id.titleRightbtn)
+    private TextView titleRightbtn;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,6 +46,16 @@ public class MusicPlayerActivity extends BasePlayActivity {
         EventBus.getDefault().register(this);
         setAdapter();
 
+        titleRightbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isShow) {
+                    hidePlaybackControls();
+                } else {
+                    showQuickControl();
+                }
+            }
+        });
         musicListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -64,9 +81,10 @@ public class MusicPlayerActivity extends BasePlayActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(adapter!=null){
+        if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
+
     }
 
     /**
@@ -91,6 +109,16 @@ public class MusicPlayerActivity extends BasePlayActivity {
         protected void onPostExecute(Void result) {
             PromptManager.closeProgressDialog();
             adapter.notifyDataSetChanged();
+
+            if(LqBookConst.isServiceWork(getApplicationContext(),LqBookConst.MEDIA_SERVICE)){
+                Log.i(TAG,"InitDataTask ====" + MediaUtil.CURRENTPOS);
+                if (MediaUtil.getInstacen().getSongList().size() > 0) {
+                    if (MediaUtil.CURRENTPOS >= 0 && MediaUtil.CURRENTPOS <= MediaUtil.getInstacen().getSongList().size()) {
+                        EventBus.getDefault().post(new AgainPlayEvent(MediaUtil.getInstacen().getCurrent()));
+                    }
+                }
+            }
+
         }
     }
 
@@ -102,11 +130,9 @@ public class MusicPlayerActivity extends BasePlayActivity {
     }
 
 
-
     @Subscribe
     public void onMessageEvent(UpdateListColorEvent event) {
-        int pos = event.message;
-        if(adapter!=null){
+        if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
 
@@ -118,7 +144,6 @@ public class MusicPlayerActivity extends BasePlayActivity {
         //注销事件接受
         EventBus.getDefault().unregister(this);
     }
-
 
 
 }
