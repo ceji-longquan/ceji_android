@@ -67,14 +67,6 @@
             />
 
         <service
-            android:name="com.lqtemple.android.lqbookreader.service.MusicPlayerService"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter >
-                <action android:name="com.lqtemple.android.lqbookreader.service.MusicPlayerService.player"></action>
-            </intent-filter>
-        </service>
-        <service
             android:name="com.lqtemple.android.lqbookreader.service.MediaService"
             android:enabled="true"
             android:exported="true">
