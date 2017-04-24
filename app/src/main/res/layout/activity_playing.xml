@@ -67,7 +67,7 @@
                     android:layout_height="1.0dip"
                     android:layout_alignParentTop="true"
                     android:background="@drawable/play_topbar_line" />
-
+<!--
                 <ImageView
                     android:id="@+id/needle"
                     android:layout_width="wrap_content"
@@ -79,7 +79,7 @@
                     android:rotation="-30"
                     android:src="@drawable/play_needle"
                     android:transformPivotX="15.1dp"
-                    android:transformPivotY="15.1dp" />
+                    android:transformPivotY="15.1dp" />-->
             </RelativeLayout>
 
         </FrameLayout>
@@ -156,7 +156,7 @@
             android:gravity="center_horizontal|center_vertical"
             android:orientation="vertical">
 
-            <LinearLayout
+            <!--<LinearLayout
                 android:id="@+id/music_tool"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -197,7 +197,7 @@
                     android:layout_weight="1"
                     android:src="@drawable/play_icn_more" />
             </LinearLayout>
-
+-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -217,18 +217,18 @@
                     android:textColor="@color/white_text"
                     android:textSize="10sp" />
 
-                <!--<com.wm.remusic.widget.PlayerSeekBar-->
-                    <!--android:id="@+id/play_seek"-->
-                    <!--style="@style/Widget.AppCompat.ProgressBar.Horizontal"-->
-                    <!--android:layout_width="0dp"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_gravity="center_vertical"-->
-                    <!--android:layout_weight="22"-->
-                    <!--android:maxHeight="8dp"-->
-                    <!--android:minHeight="8dp"-->
-                    <!--android:progressDrawable="@drawable/play_seekbar"-->
-                    <!--android:secondaryProgress="0"-->
-                    <!--android:thumb="@drawable/play_plybar_btn" />-->
+                <com.lqtemple.android.lqbookreader.view.PlayerSeekBar
+                    android:id="@+id/play_seek"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="22"
+                    android:maxHeight="8dp"
+                    android:minHeight="8dp"
+                    android:progressDrawable="@drawable/play_seekbar"
+                    android:secondaryProgress="0"
+                    android:thumb="@drawable/play_volumebar_btn" />
 
                 <TextView
                     android:id="@+id/music_duration"

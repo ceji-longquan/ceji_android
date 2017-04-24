@@ -18,6 +18,8 @@ package com.lqtemple.android.lqbookreader.activity.fragment;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,20 +29,23 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.lqtemple.android.lqbookreader.R;
+import com.lqtemple.android.lqbookreader.activity.FullScreenPlayerActivity;
 import com.lqtemple.android.lqbookreader.event.MusicEvent;
-import com.lqtemple.android.lqbookreader.event.StartPlayEvent;
-import com.lqtemple.android.lqbookreader.model.MusicPlayInfo;
-import com.lqtemple.android.lqbookreader.service.MusicPlayerService;
+import com.lqtemple.android.lqbookreader.event.UpdateListColorEvent;
+import com.lqtemple.android.lqbookreader.model.MusicMedia;
+import com.lqtemple.android.lqbookreader.service.MediaService;
+import com.lqtemple.android.lqbookreader.util.ConstantValue;
+import com.lqtemple.android.lqbookreader.util.HandlerManager;
 import com.lqtemple.android.lqbookreader.util.LogHelper;
 import com.lqtemple.android.lqbookreader.util.LqBookConst;
+import com.lqtemple.android.lqbookreader.util.MediaUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.lqtemple.android.lqbookreader.service.MusicPlayerService.mediaPlayer;
+import static com.lqtemple.android.lqbookreader.util.MediaUtil.getInstacen;
 
 
 /**
@@ -58,14 +63,68 @@ public class PlaybackControlsFragment extends Fragment {
     private String mArtUrl;
 
     private SeekBar audioSeekBar;
-    private Intent intent = new Intent();
-    protected int currentposition = 0;//当前播放列表里哪首音乐
+
+    private Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case ConstantValue.STARTED:
+                    // 开始刷新播放列表界面
+                    Log.i(TAG, "MediaUtil.STARTED =" + ConstantValue.STARTED);
+
+                    break;
+                case ConstantValue.FINISHED:
+                    // 结束刷新播放列表界面
+                    Log.i(TAG, "MediaUtil.FINISHED =" + ConstantValue.FINISHED);
+
+                    break;
+                case ConstantValue.PLAY_END:
+                    // 播放完成
+                    // 播放模式：单曲循环、顺序播放、循环播放、随机播放
+                    // 单曲循环:记录当前播放位置
+                    // 顺序播放:当前播放位置上＋1
+                    // 循环播放:判断如果，增加的结果大于songList的大小，修改播放位置为零
+                    // 随机播放:Random.nextInt() songList.size();
+                    Log.i(TAG, "MediaUtil.PLAY_END =" + ConstantValue.PLAY_END);
+                    MediaUtil.CURRENTPOS++;
+
+                    if (MediaUtil.CURRENTPOS < getInstacen()
+                            .getSongList().size()) {
+                        MusicMedia music = getInstacen().getSongList()
+                                .get(MediaUtil.CURRENTPOS);
+                        startSeekBarPlayService(music, LqBookConst.DEFAULT_PROGRESS, ConstantValue.OPTION_PLAY);
+
+                    } else {
+                        MediaUtil.CURRENTPOS = 0;
+                        MusicMedia music = getInstacen().getSongList()
+                                .get(MediaUtil.CURRENTPOS);
+                        startSeekBarPlayService(music, LqBookConst.DEFAULT_PROGRESS, ConstantValue.OPTION_PLAY);
+                    }
+                    MediaUtil.LAST_POS = MediaUtil.CURRENTPOS;
+                    EventBus.getDefault().post(new UpdateListColorEvent(MediaUtil.CURRENTPOS));
+                    break;
+                case ConstantValue.SEEKBAR_CHANGE:
+                    // 根据播放时长改变SeekBar
+                    int arg1 = msg.arg1;
+                    int arg2 = msg.arg2;
+                    Log.i(TAG, "PlaybackControlsFragment.arg2 =" + arg2);
+                    mSubtitle.setText(LqBookConst.toTime(arg1));
+                    audioSeekBar.setMax(arg2);
+                    audioSeekBar.setProgress(arg1);
+                    //
+                    mExtraInfo.setText(LqBookConst.toTime(arg2));
+
+                    break;
+            }
+
+        }
+    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //绑定事件接受
         EventBus.getDefault().register(this);
+
     }
 
     @Override
@@ -83,28 +142,23 @@ public class PlaybackControlsFragment extends Fragment {
         mAlbumArt = (ImageView) rootView.findViewById(R.id.album_art);
         init();
 
-        /*rootView.setOnClickListener(new View.OnClickListener() {
+        rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), FullScreenPlayerActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                //                MediaControllerCompat controller = ((FragmentActivity) getActivity())
-                //                        .getSupportMediaController();
-                //                MediaMetadataCompat metadata = controller.getMetadata();
-                //                if (metadata != null) {
-                //                    intent.putExtra(MusicPlayerActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION,
-                //                        metadata.getDescription());
-                //                }
-                                startActivity(intent);
+                Intent playIntent = new Intent(getActivity(), FullScreenPlayerActivity.class);
+                playIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                playIntent.putExtra("music", getInstacen().getSongList().get(MediaUtil.CURRENTPOS));
+                startActivity(playIntent);
+
+                //                playIntent.putExtra("position", position);
             }
-        });*/
+        });
         return rootView;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        LogHelper.d(TAG, "fragment.onStart");
 
     }
 
@@ -115,6 +169,27 @@ public class PlaybackControlsFragment extends Fragment {
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        HandlerManager.putHandler(handler);
+        LogHelper.d(TAG, "MediaUtil.CURRENTPOS=" + MediaUtil.CURRENTPOS);
+        LogHelper.d(TAG, "MediaUtil.CURRENTPOS=" + MediaUtil.CURRENTPOS);
+
+        if (MediaUtil.CURRENTPOS >= 0 && MediaUtil.CURRENTPOS < MediaUtil.getInstacen().getSongList().size()) {
+            MusicMedia musicMedia = MediaUtil.getInstacen().getSongList().get(MediaUtil.CURRENTPOS);
+            if (musicMedia != null) {
+                mTitle.setText(musicMedia.getTitle());
+                if (MediaService.isPlaying) {
+                    mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
+                } else {
+                    mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
+                }
+            }
+        }
+
+
+    }
 
     private final View.OnClickListener mButtonListener = new View.OnClickListener() {
         @Override
@@ -122,42 +197,51 @@ public class PlaybackControlsFragment extends Fragment {
 
             switch (v.getId()) {
                 case R.id.play_pause:
-                    if (MusicPlayerService.isStartService) {
-                        if (MusicPlayerService.isplay) {
-                            Log.d(TAG, "pause");
-                            pause();
-                            MusicPlayerService.isplay = false;
-                        } else {
-                            player(LqBookConst.RE_START_PLAY);
-                            MusicPlayerService.isplay = true;
-                            Log.d(TAG, "player");
-                        }
-                    } else {
-                        Toast.makeText(getActivity(), R.string.select_yinpin, Toast.LENGTH_SHORT).show();
-                    }
+                    if (MediaService.isPlaying) {
+                        startSeekBarPlayService(null, LqBookConst.DEFAULT_PROGRESS, ConstantValue.OPTION_PAUSE);
+                        mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
 
+                    } else {
+                        startSeekBarPlayService(null, LqBookConst.DEFAULT_PROGRESS, ConstantValue.OPTION_CONTINUE);
+                        mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
+
+
+                    }
                     break;
             }
         }
     };
 
 
-    @Subscribe
-    public void onMessageEvent(MusicEvent event) {
-        MusicPlayInfo musicPlayInfo = event.message;
-        audioSeekBar.setMax(musicPlayInfo.getMaxPos());
-        audioSeekBar.setProgress(musicPlayInfo.getCurrentPos());
-        mTitle.setText(musicPlayInfo.getName());
-        mSubtitle.setText(musicPlayInfo.getCurrentPlayTime() + "  / " + musicPlayInfo.getAllTime());
-    }
+    private void startSeekBarPlayService(MusicMedia music, int progress, int option) {
+        Intent intent = new Intent(getActivity().getApplicationContext(), MediaService.class);
+        if (music != null) {
+            intent.putExtra("music", music);
+            intent.putExtra("file", music.getUrl());
 
-
-    @Subscribe
-    public void onMessageEvent(StartPlayEvent event) {
-        if (event.pos >= 0) {
+        }
+        intent.putExtra("option", option);
+        intent.putExtra("progress", progress);
+        getActivity().getApplicationContext().startService(intent);
+        if (MediaService.isPlaying) {
             mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
+        } else {
+            mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
         }
     }
+
+
+    @Subscribe
+    public void onMessageEvent(MusicEvent event) {
+        MusicMedia musicPlayInfo = event.message;
+        audioSeekBar.setMax(musicPlayInfo.getDuration());
+        mTitle.setText(musicPlayInfo.getTitle());
+        startSeekBarPlayService(musicPlayInfo, LqBookConst.DEFAULT_PROGRESS, ConstantValue.OPTION_PLAY);
+        mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
+
+    }
+
+
 
     private void init() {
 
@@ -165,63 +249,17 @@ public class PlaybackControlsFragment extends Fragment {
         audioSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (currentposition == -1) {
-                    Log.i(TAG, "MusicActivity...showInfo(请选择要播放的音乐);.........");
-                    //还没有选择要播放的音乐
-                    showInfo("请选择要播放的音乐");
-                } else {
-                    //假设改变源于用户拖动
-                    if (fromUser) {
-                        //这里有个问题，如果播放时用户拖进度条还好说，但是如果是暂停时，拖完会自动播放，所以还需要把图标设置一下
-                        mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
-                        MusicPlayerService.mediaPlayer.seekTo(progress);// 当进度条的值改变时，音乐播放器从新的位置开始播放
-                    }
-
-                }
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                if (mediaPlayer != null) {
-                    mediaPlayer.pause();
-                }
-
-                //MusicPlayerService.mediaPlayer.pause(); // 开始拖动进度条时，音乐暂停播放
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if (mediaPlayer != null) {
-                    mediaPlayer.start();
-                }
-                //MusicPlayerService.mediaPlayer.start(); // 停止拖动进度条时，音乐开始播放
+                startSeekBarPlayService(null, seekBar.getProgress(), ConstantValue.OPTION_UPDATE_PROGESS);
             }
         });
-    }
-
-
-    protected void player(String info) {
-        intent.putExtra(LqBookConst.START_PLAY_KEY, info);
-        intent.setPackage(getActivity().getPackageName());//这里你需要设置你应用的包名
-        mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
-        getActivity().startService(intent);
-    }
-
-    /*
-       * MSG :
-       *  0  未播放--->播放
-       *  1    播放--->暂停
-       *  2    暂停--->继续播放
-       * */
-    protected void pause() {
-        intent.setPackage(getActivity().getPackageName());//这里你需要设置你应用的包名
-        intent.putExtra(LqBookConst.START_PLAY_KEY, LqBookConst.START_PAUSE);
-        mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
-        getActivity().startService(intent);
-    }
-
-    private void showInfo(String info) {
-        Toast.makeText(getActivity(), info, Toast.LENGTH_SHORT).show();
     }
 
 
