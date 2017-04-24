@@ -29,6 +29,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.activity.FullScreenPlayerActivity;
@@ -46,6 +47,7 @@ import com.lqtemple.android.lqbookreader.util.MediaUtil;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.lqtemple.android.lqbookreader.service.MediaService.isPlaying;
 import static com.lqtemple.android.lqbookreader.service.MediaService.mContext;
 import static com.lqtemple.android.lqbookreader.util.MediaUtil.getInstacen;
 
@@ -101,7 +103,9 @@ public class PlaybackControlsFragment extends Fragment {
                                 .get(MediaUtil.CURRENTPOS);
                         startSeekBarPlayService(music, LqBookConst.DEFAULT_PROGRESS, ConstantValue.OPTION_PLAY);
                     }
+
                     MediaUtil.LAST_POS = MediaUtil.CURRENTPOS;
+                    mTitle.setText(MediaUtil.getInstacen().getCurrent().getTitle());
                     EventBus.getDefault().post(new UpdateListColorEvent(MediaUtil.CURRENTPOS));
                     break;
                 case ConstantValue.SEEKBAR_CHANGE:
@@ -190,7 +194,7 @@ public class PlaybackControlsFragment extends Fragment {
             }
         }
 
-        if (MediaService.isPlaying) {
+        if (isPlaying) {
             mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
         } else {
             mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
@@ -204,7 +208,15 @@ public class PlaybackControlsFragment extends Fragment {
 
             switch (v.getId()) {
                 case R.id.play_pause:
-                    if (MediaService.isPlaying) {
+                    Log.i(TAG, "play_pause =" + isPlaying);
+                    Log.i(TAG, "CURRENTPOS =" + MediaUtil.CURRENTPOS);
+
+                    if(MediaUtil.CURRENTPOS<0 ){
+                        Toast.makeText(getActivity(), R.string.select_yinpin, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (isPlaying) {
                         startSeekBarPlayService(null, LqBookConst.DEFAULT_PROGRESS, ConstantValue.OPTION_PAUSE);
                         mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
 
@@ -243,7 +255,7 @@ public class PlaybackControlsFragment extends Fragment {
             }
 
 
-            if (MediaService.isPlaying) {
+            if (isPlaying) {
                 mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
             } else {
                 mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);
@@ -271,7 +283,7 @@ public class PlaybackControlsFragment extends Fragment {
         audioSeekBar.setMax(musicPlayInfo.getDuration());
         mTitle.setText(musicPlayInfo.getTitle());
         startSeekBarPlayService(null, LqBookConst.DEFAULT_PROGRESS, ConstantValue.OPTION_DEFAULT);
-        if (MediaService.isPlaying) {
+        if (isPlaying) {
             mPlayPause.setBackgroundResource(R.mipmap.ic_pause_black_36dp);
         } else {
             mPlayPause.setBackgroundResource(R.mipmap.ic_play_arrow_black_36dp);

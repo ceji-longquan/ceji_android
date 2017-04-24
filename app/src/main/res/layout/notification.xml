@@ -3,7 +3,8 @@
     android:id="@+id/layout"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/notficatin_bg">
 
     <ImageView
         android:id="@+id/image"
