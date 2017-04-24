@@ -312,13 +312,13 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 
 	@Override
 	public void onCompletion(MediaPlayer arg0) {
-		Log.i(TAG, "onCompletion=" + arg0);
+//		Log.i(TAG, "onCompletion=" + arg0);
 		HandlerManager.getHandler().sendEmptyMessage(ConstantValue.PLAY_END);
 	}
 
 	@Override
 	public void onSeekComplete(MediaPlayer mp) {
-		Log.i(TAG, "onSeekComplete=" + mp);
+//		Log.i(TAG, "onSeekComplete=" + mp);
 		if (player.isPlaying()) {
 			player.start();
 			isPlaying = true;
@@ -349,8 +349,8 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
                     msg.arg2 = player.getDuration();
                     default_postion = msg.arg1;
                     HandlerManager.getHandler().sendMessage(msg);
-                    Log.i(TAG, "isPlaying:=" + isPlaying);
-                    Log.i(TAG, "onProgressUpdate:arg1=" + msg.arg1);
+//                    Log.i(TAG, "isPlaying:=" + isPlaying);
+//                    Log.i(TAG, "onProgressUpdate:arg1=" + msg.arg1);
     //				Log.i(TAG, "onProgressUpdate:arg2=" + msg.arg2);
 					super.onProgressUpdate(values);
 
@@ -404,7 +404,7 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 		//                new Intent(this.getApplicationContext(), PlayingActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 		final Intent nowPlayingIntent = new Intent();
 		//nowPlayingIntent.setAction("com.wm.remusic.LAUNCH_NOW_PLAYING_ACTION");
-		nowPlayingIntent.setComponent(new ComponentName("com.wm.remusic","com.wm.remusic.activity.PlayingActivity"));
+		nowPlayingIntent.setComponent(new ComponentName("com.lqtemple.android.lqbookreader","com.lqtemple.android.lqbookreader.activity.FullScreenPlayerActivity"));
 		nowPlayingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		PendingIntent clickIntent = PendingIntent.getBroadcast(this, 0, nowPlayingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		PendingIntent click = PendingIntent.getActivity(this,0,nowPlayingIntent,PendingIntent.FLAG_UPDATE_CURRENT);

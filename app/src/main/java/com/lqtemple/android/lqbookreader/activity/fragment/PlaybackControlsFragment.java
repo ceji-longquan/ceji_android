@@ -110,7 +110,7 @@ public class PlaybackControlsFragment extends Fragment {
                     break;
                 case ConstantValue.SEEKBAR_CHANGE:
                     // 根据播放时长改变SeekBar
-                    Log.i(TAG, "PlaybackControlsFragment.arg2 =" + msg.arg2);
+//                    Log.i(TAG, "PlaybackControlsFragment.arg2 =" + msg.arg2);
                     mSubtitle.setText(LqBookConst.toTime(msg.arg1));
                     audioSeekBar.setMax(msg.arg2);
                     audioSeekBar.setProgress(msg.arg1);
