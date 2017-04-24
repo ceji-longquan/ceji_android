@@ -1,11 +1,14 @@
 package com.lqtemple.android.lqbookreader.service;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
@@ -51,6 +54,13 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 
 	private Notification mNotification;
 	private long mNotificationPostTime =0;
+	private RemoteViews remoteViews;
+	private int mServiceStartId = -1;
+	private NotificationManager mNotificationManager;
+
+
+	private static boolean  isAlive = true;
+
 	// private Handler handler;
 
 	@Override
@@ -60,7 +70,17 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 
 	@Override
 	public void onCreate() {
-		mContext = this;
+		mContext = getApplicationContext();
+		mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+		// Initialize the intent filter and each action
+		final IntentFilter filter = new IntentFilter();
+		filter.addAction(TOGGLEPAUSE_ACTION);
+		filter.addAction(STOP_ACTION);
+		filter.addAction(NEXT_ACTION);
+		filter.addAction(Intent.ACTION_SCREEN_OFF);
+		// Attach the broadcast listener
+		registerReceiver(mIntentReceiver, filter);
 
 		super.onCreate();
 		if (player == null) {
@@ -70,6 +90,73 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 			player.setOnErrorListener(this);
 		}
 	}
+
+
+
+	private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(final Context context, final Intent intent) {
+			int  flag = intent.getIntExtra("FLAG" ,-1);
+			Log.i(TAG, "flag=" + flag);
+
+			switch (flag){
+
+
+				case 1 :
+					if(isPlaying){
+						pause();
+						remoteViews.setImageViewResource(R.id.iv_pause, R.drawable.note_btn_play);
+					}else{
+						player.start();
+						isPlaying = true;
+						remoteViews.setImageViewResource(R.id.iv_pause, R.drawable.note_btn_pause);
+
+					}
+					mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+
+					break;
+
+				case 2 :
+					MediaUtil.CURRENTPOS++;
+					MusicMedia musicMedia = null;
+					if(MediaUtil.CURRENTPOS>0 && MediaUtil.CURRENTPOS<MediaUtil.getInstacen().getSongList().size()){
+						musicMedia = MediaUtil.getInstacen().getCurrent();
+
+					}else{
+						MediaUtil.CURRENTPOS = 0;
+						musicMedia = MediaUtil.getInstacen().getCurrent();
+					}
+					if(musicMedia!=null){
+						play(musicMedia.getUrl());
+					}
+
+					String text = TextUtils.isEmpty(musicMedia.getAlbum()) ? musicMedia.getArtist() : musicMedia.getArtist()  + " - " + musicMedia.getAlbum();
+					remoteViews.setTextViewText(R.id.title, musicMedia.getTitle());
+					remoteViews.setTextViewText(R.id.text, text);
+					remoteViews.setImageViewResource(R.id.iv_pause, R.drawable.note_btn_pause);
+
+					mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+
+					break;
+
+				case 3 :
+//					Log.i(TAG, "mServiceStartId=" + mServiceStartId);
+//					isAlive = false;
+//					task =null;
+//					stop();
+					MediaUtil.CURRENTPOS =-1;
+					cancelNotification();
+					stop();
+					player = null;
+					isAlive = false;
+					task = null;
+					break;
+
+			}
+
+		}
+	};
 
 	@Override
 	public void onStart(Intent intent, int startId) {
@@ -84,7 +171,6 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 				file = intent.getStringExtra("file");
 				play(file);
 				MediaUtil.PLAYSTATE = option;
-				Log.i(TAG, "OPTION_PLAY=" + ConstantValue.OPTION_PLAY);
 
 				break;
 			case ConstantValue.OPTION_PAUSE:
@@ -102,8 +188,10 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 					file = intent.getStringExtra("file");
 					play(file);
 				} else {
-					player.start();
-					isPlaying = true;
+					if(player!=null){
+						player.start();
+						isPlaying = true;
+					}
 				}
 				MediaUtil.PLAYSTATE = option;
 
@@ -120,7 +208,9 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-
+		Log.i(TAG, "onStartCommand isAlive=" + isAlive);
+		isAlive = true;
+		mServiceStartId = startId;
 		mMusicMedia = (MusicMedia)intent.getSerializableExtra("music");
 		Log.i(TAG, "mMusicMedia=" + mMusicMedia);
 
@@ -153,8 +243,11 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 
 	@Override
 	public void onDestroy() {
+		unregisterReceiver(mIntentReceiver);
+		task = null;
 		stop();
 		super.onDestroy();
+
 	}
 
 	private void play(String path) {
@@ -205,20 +298,27 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 
 	private void playerToPosiztion(int posiztion) {
 
-		if (posiztion > 0 && posiztion < player.getDuration()) {
-			player.seekTo(posiztion);
+		try {
+			if(player!=null){
+				if (posiztion > 0 && posiztion < player.getDuration()) {
+					player.seekTo(posiztion);
+				}
+			}
+
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void onCompletion(MediaPlayer arg0) {
-		Log.i(TAG, "onProgressUpdate:arg0=" + arg0);
+		Log.i(TAG, "onCompletion=" + arg0);
 		HandlerManager.getHandler().sendEmptyMessage(ConstantValue.PLAY_END);
 	}
 
 	@Override
 	public void onSeekComplete(MediaPlayer mp) {
-
+		Log.i(TAG, "onSeekComplete=" + mp);
 		if (player.isPlaying()) {
 			player.start();
 			isPlaying = true;
@@ -231,28 +331,33 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			while (true) {
+			while (isAlive) {
 //				Log.i(TAG, "isPlaying:" + player.isPlaying());
 				SystemClock.sleep(1000);
 				publishProgress();
 			}
+			return null;
 		}
 
 		@Override
 		protected void onProgressUpdate(Void... values) {
-			if (player.isPlaying()) {
-				Message msg = Message.obtain();
-				msg.what = ConstantValue.SEEKBAR_CHANGE;
-				msg.arg1 = player.getCurrentPosition() + 1000;
-				msg.arg2 = player.getDuration();
-				default_postion = msg.arg1;
-				HandlerManager.getHandler().sendMessage(msg);
-				Log.i(TAG, "isPlaying：=" + isPlaying);
-				Log.i(TAG, "onProgressUpdate:arg1=" + msg.arg1);
-//				Log.i(TAG, "onProgressUpdate:arg2=" + msg.arg2);
+			try {
+				if (player.isPlaying()) {
+                    Message msg = Message.obtain();
+                    msg.what = ConstantValue.SEEKBAR_CHANGE;
+                    msg.arg1 = player.getCurrentPosition() + 1000;
+                    msg.arg2 = player.getDuration();
+                    default_postion = msg.arg1;
+                    HandlerManager.getHandler().sendMessage(msg);
+                    Log.i(TAG, "isPlaying:=" + isPlaying);
+                    Log.i(TAG, "onProgressUpdate:arg1=" + msg.arg1);
+    //				Log.i(TAG, "onProgressUpdate:arg2=" + msg.arg2);
+					super.onProgressUpdate(values);
 
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			super.onProgressUpdate(values);
 		}
 
 	}
@@ -266,13 +371,11 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 
 
 	private Notification getNotification(MusicMedia musicMedia) {
-		RemoteViews remoteViews;
 		final int PAUSE_FLAG = 0x1;
 		final int NEXT_FLAG = 0x2;
 		final int STOP_FLAG = 0x3;
 		final String albumName = musicMedia.getAlbum();
 		final String artistName = musicMedia.getArtist();
-		final boolean isPlaying = isPlaying();
 
 		remoteViews = new RemoteViews(this.getPackageName(), R.layout.notification);
 		String text = TextUtils.isEmpty(albumName) ? artistName : artistName + " - " + albumName;
@@ -283,7 +386,8 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 		Intent pauseIntent = new Intent(TOGGLEPAUSE_ACTION);
 		pauseIntent.putExtra("FLAG", PAUSE_FLAG);
 		PendingIntent pausePIntent = PendingIntent.getBroadcast(this, 0, pauseIntent, 0);
-		remoteViews.setImageViewResource(R.id.iv_pause, isPlaying ? R.drawable.note_btn_pause : R.drawable.note_btn_play);
+
+		remoteViews.setImageViewResource(R.id.iv_pause,  R.drawable.note_btn_pause);
 		remoteViews.setOnClickPendingIntent(R.id.iv_pause, pausePIntent);
 
 		Intent nextIntent = new Intent(NEXT_ACTION);
@@ -326,7 +430,16 @@ public class MediaService extends Service implements OnCompletionListener, OnSee
 	}
 
 
-	public boolean isPlaying() {
-		return isPlaying;
+
+	private void cancelNotification() {
+		stopForeground(true);
+		//mNotificationManager.cancel(hashCode());
+		mNotificationManager.cancel(NOTIFICATION_ID);
+		mNotificationPostTime = 0;
 	}
+
+
+
+
+
 }
