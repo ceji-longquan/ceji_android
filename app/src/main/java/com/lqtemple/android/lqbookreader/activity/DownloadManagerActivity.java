@@ -42,13 +42,30 @@ public class DownloadManagerActivity extends BaseActivity implements View.OnClic
 
     @InjectView(R.id.listView)
     ListView listView;
+/*
+    private  ArrayList<VoiceModel> mAlreadDownList;
+
+    private Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+
+                case DownLoadValue.SCANF:
+
+                    adapter.notifyDataSetChanged();
+                    Log.i(TAG, " updata suseecess= " );
+
+                    break;
+            }
+
+        }
+    };*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_download_manager);
         InjectUtils.bind(this);
-
+//        mAlreadDownList = (ArrayList<VoiceModel>)getIntent().getSerializableExtra("mAlreadDownList");
         downloadManager = DownloadService.getDownloadManager();
         allTask = downloadManager.getAllTask();
         adapter = new MyAdapter();
@@ -56,6 +73,8 @@ public class DownloadManagerActivity extends BaseActivity implements View.OnClic
         titleRightbtn.setOnClickListener(this);
 
         downloadManager.getThreadPool().getExecutor().addOnAllTaskEndListener(this);
+//        new AddTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);// 不用等待
+
     }
 
 
@@ -243,7 +262,20 @@ public class DownloadManagerActivity extends BaseActivity implements View.OnClic
                 }
                 refresh();
             } else if (v.getId() == remove.getId()) {
-                downloadManager.removeTask(downloadInfo.getUrl());
+                Log.i(TAG,"=="+downloadInfo.getUrl()+"="+downloadInfo);
+                String url = downloadInfo.getUrl();
+                if(downloadManager!=null && url!=null){
+                    downloadManager.removeTask(url,true);
+
+                    MediaScannerConnection.scanFile(getApplicationContext() ,
+                            new String[]{downloadInfo.getTargetPath()}, null,
+                            new MediaScannerConnection.OnScanCompletedListener() {
+                                public void onScanCompleted(String path, Uri uri) {
+                                    Log.i("ExternalStorage", "Scanned " + path + ":");
+                                    Log.i("ExternalStorage", "-> uri=" + uri);
+                                }
+                            });
+                }
                 adapter.notifyDataSetChanged();
             } else if (v.getId() == restart.getId()) {
                 downloadManager.restartTask(downloadInfo.getUrl());
@@ -281,6 +313,39 @@ public class DownloadManagerActivity extends BaseActivity implements View.OnClic
             if (errorMsg != null) Toast.makeText(DownloadManagerActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
         }
     }
+
+
+
+/*    private class AddTask extends AsyncTask<Void, Void, Void> {
+
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            for (VoiceModel file:mAlreadDownList ) {
+                Log.i(TAG, "file= " + file.getName());
+                for (int i=0 ;i<allTask.size();i++) {
+                    if(!file.getName().equals(allTask.get(i).getFileName())){
+
+                        GetRequest request = OkGo.get(file.getUrl())//
+                                .headers("headerKey1", "headerValue1")//
+                                .headers("headerKey2", "headerValue2")//
+                                .params("paramKey1", "paramValue1")//
+                                .params("paramKey2", "paramValue2");
+                        downloadManager.addTask(null, file, request, null);
+                        Log.i(TAG, "geti= " + allTask.get(i).getFileName());
+
+                    }
+
+                }
+
+            }
+            Message msg = Message.obtain();
+            msg.what = DownLoadValue.SCANF;
+            handler.sendMessage(msg);
+            return null;
+        }
+    }*/
 
 
 }

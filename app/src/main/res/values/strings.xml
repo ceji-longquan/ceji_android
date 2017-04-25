@@ -409,6 +409,7 @@
     <string name="other_down_task">所有下载线程结束，部分下载未完成</string>
     <string name="down_path">下载路径</string>
     <string name="enqueue">已加入队列</string>
+    <string name="alreadydown">已下载</string>
     <string name="task_enqueue">任务已经在下载列表中</string>
     <string name="down_task">请先下载任务</string>
 

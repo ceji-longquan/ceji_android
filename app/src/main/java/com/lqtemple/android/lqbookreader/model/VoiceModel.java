@@ -8,6 +8,7 @@ public class VoiceModel implements Serializable {
     private String name;
     private String url;
     private String iconUrl;
+    private boolean isExit= false;
 
     public VoiceModel() {
     }
@@ -40,5 +41,13 @@ public class VoiceModel implements Serializable {
 
     public void setIconUrl(String iconUrl) {
         this.iconUrl = iconUrl;
+    }
+
+    public boolean isExit() {
+        return isExit;
+    }
+
+    public void setExit(boolean exit) {
+        isExit = exit;
     }
 }

@@ -20,6 +20,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -44,7 +45,8 @@ import java.util.ArrayList;
 
 
 public class DownLoadActivity extends BaseActivity {
-    private String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE};
+    private final String TAG = "DownLoadActivity";
+    private String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
 
     @InjectView(R.id.recyclerView)
     RecyclerView recyclerView;
@@ -54,12 +56,37 @@ public class DownLoadActivity extends BaseActivity {
     private ArrayList<VoiceModel> mVoiceModels;
     private DownloadManager downloadManager;
     private MainAdapter adapter;
+//    private ScanfFileTask mScanfFileTask;
+//    private List<File> mFileList;
+    private ArrayList<VoiceModel> mAlreadDownList;
+/*
+    private Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+
+                case DownLoadValue.SCANF:
+                    Log.i(TAG, "mVoiceModels= " + mVoiceModels.size());
+
+                    adapter.notifyDataSetChanged();
+//                    adapter.updateItems(mVoiceModels);
+                    Log.i(TAG, "mVoiceModels updata suseecess= " );
+
+                    break;
+            }
+
+        }
+    };*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_download);
         InjectUtils.bind(this);
+//        mFileList = new ArrayList<>();
+        mAlreadDownList = new ArrayList<>();
+
+//        new ScanfFileTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);// 不用等待
+
 
         // 版本判断。当手机系统大于 23 时，才有必要去判断权限是否获取
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -87,14 +114,16 @@ public class DownLoadActivity extends BaseActivity {
         openManager.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), DownloadManagerActivity.class));
+                Intent intent = new Intent(getApplicationContext(), DownloadManagerActivity.class);
+                intent.putExtra("mAlreadDownList",mAlreadDownList);
+                startActivity(intent);
             }
         });
     }
 
 
     // 提示用户该请求权限的弹出框
-    private  void showDialogTipUserRequestPermission() {
+    private void showDialogTipUserRequestPermission() {
 
         new AlertDialog.Builder(DownLoadActivity.this)
                 .setTitle(R.string.storage_permission)
@@ -129,7 +158,7 @@ public class DownLoadActivity extends BaseActivity {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View convertView=null ;
+            View convertView = null;
             ViewHolder hold;
             if (convertView == null) {
                 convertView = inflater.inflate(R.layout.item_download_details, parent, false);
@@ -173,10 +202,18 @@ public class DownLoadActivity extends BaseActivity {
             if (downloadManager.getDownloadInfo(voiceModel.getUrl()) != null) {
                 download.setText(R.string.enqueue);
                 download.setEnabled(false);
+                Log.i(TAG, "bind.isExit()= " +mVoiceModel.isExit());
+
             } else {
                 download.setText(R.string.start_down);
                 download.setEnabled(true);
             }
+            if(mVoiceModel.isExit()){
+                download.setText(R.string.alreadydown);
+                download.setEnabled(false);
+            }
+            Log.i(TAG, "mVoiceModel.isExit()= " +mVoiceModel.isExit());
+
             name.setText(voiceModel.getName());
             Glide.with(getApplicationContext()).load(voiceModel.getIconUrl()).error(R.mipmap.ic_launcher).into(icon);
             download.setOnClickListener(this);
@@ -211,17 +248,17 @@ public class DownLoadActivity extends BaseActivity {
 
         mVoiceModels = new ArrayList<>();
         VoiceModel apkInfo0 = new VoiceModel();
-        apkInfo0.setName(getString(R.string.first_chapter));
+        apkInfo0.setName("001A.MP3");
         apkInfo0.setIconUrl("http://img4.imgtn.bdimg.com/it/u=1282952687,2433742667&fm=23&gp=0.jpg");
         apkInfo0.setUrl("http://www.theqi.com/buddhism/GL1/audio/001A.MP3");
         mVoiceModels.add(apkInfo0);
         VoiceModel apkInfo1 = new VoiceModel();
-        apkInfo1.setName(getString(R.string.two_chapter));
+        apkInfo1.setName("001B.MP3");
         apkInfo1.setIconUrl("http://img4.imgtn.bdimg.com/it/u=1282952687,2433742667&fm=23&gp=0.jpg");
         apkInfo1.setUrl("http://www.theqi.com/buddhism/GL1/audio/001B.MP3");
         mVoiceModels.add(apkInfo1);
         VoiceModel apkInfo2 = new VoiceModel();
-        apkInfo2.setName(getString(R.string.thrid_chapter));
+        apkInfo2.setName("002A.MP3");
         apkInfo2.setIconUrl("http://img4.imgtn.bdimg.com/it/u=1282952687,2433742667&fm=23&gp=0.jpg");
         apkInfo2.setUrl("http://www.theqi.com/buddhism/GL1/audio/002A.MP3");
         mVoiceModels.add(apkInfo2);
@@ -232,5 +269,32 @@ public class DownLoadActivity extends BaseActivity {
         mVoiceModels.add(apkInfo3);
     }
 
+
+/*    private class ScanfFileTask extends AsyncTask<Void, Void, Void> {
+
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            ScanfLocalFile.getFiles(LqBookConst.DOWN_PATH, mFileList);
+
+            for (File file:mFileList ) {
+                Log.i(TAG, "file= " + file.getName());
+                for (int i=0 ;i<mVoiceModels.size();i++) {
+                    if(file.getName().equals(mVoiceModels.get(i).getName())){
+                        mVoiceModels.get(i).setExit(true);
+                        mAlreadDownList.add(mVoiceModels.get(i));
+                        Log.i(TAG, "geti= " + mVoiceModels.get(i).getName());
+
+                    }
+
+                }
+
+            }
+            Message msg = Message.obtain();
+            msg.what = DownLoadValue.SCANF;
+            handler.sendMessage(msg);
+            return null;
+        }
+    }*/
 
 }
