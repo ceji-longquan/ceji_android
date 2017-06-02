@@ -13,5 +13,8 @@
     <color name="white">#ffffff</color>
     <color name="bottom_text">#c1c0c0</color>
     <color name="notification_bak">#47fafafa</color>
+    <color name="divider_color">#d5e6ff</color>
+
+
 
 </resources>

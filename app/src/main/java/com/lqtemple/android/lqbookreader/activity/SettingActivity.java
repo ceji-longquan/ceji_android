@@ -63,12 +63,12 @@ public class SettingActivity extends BaseActivity {
 
     private void initData() {
         my_setting_list = new ArrayList();
-        my_setting_list.add(new LeftMenu(R.drawable.setting, getString(R.string.my_note)));
-        my_setting_list.add(new LeftMenu(R.drawable.setting, getString(R.string.my_note)));
-        my_setting_list.add(new LeftMenu(R.drawable.setting, getString(R.string.my_note)));
-        my_setting_list.add(new LeftMenu(R.drawable.setting, getString(R.string.my_note)));
-        my_setting_list.add(new LeftMenu(R.drawable.setting, getString(R.string.my_note)));
-        my_setting_list.add(new LeftMenu(R.drawable.setting, getString(R.string.my_note)));
+        my_setting_list.add(new LeftMenu(R.mipmap.note_icon, getString(R.string.my_note)));
+        my_setting_list.add(new LeftMenu(R.mipmap.bookmark_icon, getString(R.string.my_bookmark)));
+        my_setting_list.add(new LeftMenu(R.mipmap.lanuage_icon, getString(R.string.my_lanuage)));
+        my_setting_list.add(new LeftMenu(R.mipmap.xiazai, getString(R.string.my_music)));
+        my_setting_list.add(new LeftMenu(R.mipmap.share_icon, getString(R.string.my_share)));
+        my_setting_list.add(new LeftMenu(R.mipmap.feedback_icon, getString(R.string.my_feedback)));
     }
 
 

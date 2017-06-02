@@ -392,6 +392,11 @@
     <string name="close" >关闭</string>
     <string name="setting">设置</string>
     <string name="my_note">我的笔记</string>
+    <string name="my_bookmark">我的书签</string>
+    <string name="my_lanuage">语音转换</string>
+    <string name="my_music">离线语音下载</string>
+    <string name="my_share">分享本书</string>
+    <string name="my_feedback">意见反馈</string>
     <string name="downloadtips">开始下载</string>
 
     <string name="start_down">下载</string>

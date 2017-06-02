@@ -73,7 +73,7 @@ public class SettingAdapter extends BaseAdapter {
         return convertView;
     }
 
-    static class ViewHold {
+     class ViewHold {
         public ImageView imageView;
         public TextView textView;
     }

@@ -11,4 +11,9 @@
     <include layout="@layout/drawleft_layout"/>
 
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="开始"
+        android:onClick="onStartRead"/>
 </LinearLayout>

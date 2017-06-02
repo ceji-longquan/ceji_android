@@ -9,6 +9,8 @@
         android:id="@+id/setting_listview"
         android:layout_below="@+id/setting_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></ListView>
+        android:layout_height="wrap_content"
+        android:divider="@color/divider_color"
+        android:dividerHeight="1px"></ListView>
 
 </LinearLayout>

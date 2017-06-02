@@ -19,7 +19,6 @@ import android.widget.TextView;
 import com.lqtemple.android.lqbookreader.FileUtils;
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.activity.adapter.LeftMenuAdapter;
-import com.lqtemple.android.lqbookreader.model.LeftMenu;
 
 import java.io.File;
 import java.io.InputStream;
@@ -37,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private LeftMenuAdapter mLeftMenuAdapter, mRightMenuAdapter;
     private ArrayList mLeftArrayList;
     private ArrayList mRightArrayList;
-    private ListView leftListView;
+//    private ListView leftListView;
 
     private File target;
 
@@ -52,14 +51,17 @@ public class MainActivity extends AppCompatActivity {
 
         // 全屏
         initData();
-        leftListView = (ListView) leftLayout.findViewById(R.id.left_listview);
+/*        leftListView = (ListView) leftLayout.findViewById(R.id.left_listview);
+        leftListView.setAdapter(mLeftMenuAdapter);
+        leftListView.setOnItemClickListener(new DrawerItemClickListener());
+
         ListView rightListView = (ListView) rightLayout.findViewById(R.id.right_listview);
 
         mLeftMenuAdapter = new LeftMenuAdapter(this, mLeftArrayList);
         mRightMenuAdapter = new LeftMenuAdapter(this, mRightArrayList);
-        leftListView.setAdapter(mLeftMenuAdapter);
+
         rightListView.setAdapter(mRightMenuAdapter);
-        leftListView.setOnItemClickListener(new DrawerItemClickListener());
+*/
 
     }
 
@@ -107,15 +109,7 @@ public class MainActivity extends AppCompatActivity {
         titleRightbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //                if(mDrawerLayout.isDrawerOpen(Gravity.RIGHT)){
-                //                    mDrawerLayout.closeDrawer(Gravity.RIGHT);
-                //                }else{
-                //                    mDrawerLayout.openDrawer(Gravity.RIGHT);
-                //                    if(mDrawerLayout.isDrawerOpen(Gravity.LEFT)){
-                //                        mDrawerLayout.closeDrawer(Gravity.LEFT);
-                //                    }
-                //
-                //                }
+
                 startActivity(new Intent(getApplicationContext(), SettingActivity.class));
 
             }
@@ -134,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
 
         }
-
+/*
         mLeftArrayList = new ArrayList<LeftMenu>();
         mLeftArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
         mLeftArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
@@ -150,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
         mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
         mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
-        mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
+        mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));*/
     }
 
 
