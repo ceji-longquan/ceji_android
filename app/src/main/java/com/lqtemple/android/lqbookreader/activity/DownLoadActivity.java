@@ -44,6 +44,7 @@ import com.lzy.okserver.download.DownloadService;
 import java.util.ArrayList;
 
 
+@Deprecated
 public class DownLoadActivity extends BaseActivity {
     private final String TAG = "DownLoadActivity";
     private String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};

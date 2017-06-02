@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="15dp"
+              android:background="@drawable/fangkuang"
+              android:gravity="center"
+              android:orientation="vertical"
+              android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/min_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="appName"/>
+
+        <TextView
+            android:id="@+id/min_title_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:gravity="center"
+            android:text="appName"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/book_icon"
+            android:layout_width="26dp"
+            android:layout_height="20dp"
+            android:src="@mipmap/book_icon"/>
+
+        <TextView
+            android:id="@+id/booke_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:text="appNameappNameappNameappNameappNameappNameappNamNameappNameappNameappNameappNameapme"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/note_icon"
+            android:layout_width="26dp"
+            android:layout_height="24dp"
+            android:src="@mipmap/note_icon"/>
+
+        <TextView
+            android:id="@+id/note_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:text="appNameappNameappNameappNameappNameappNameappNamNameappNameappNameappNameappNameappName"/>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/note_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_alignParentLeft="true"
+            android:text="2017年5月31"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/delete_note_icon"
+                android:layout_width="26dp"
+                android:layout_height="20dp"
+                android:src="@mipmap/delete_icon"
+                android:clickable="true"/>
+
+            <ImageView
+                android:id="@+id/detail_note_icon"
+                android:layout_marginLeft="40dp"
+                android:layout_width="26dp"
+                android:layout_height="20dp"
+                android:paddingRight="10dp"
+                android:clickable="true"
+                android:src="@mipmap/detail_icon"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>

@@ -16,6 +16,10 @@
     <color name="divider_color">#d5e6ff</color>
     <color name="item_text_color">#000855</color>
 
+    <color name="text_bg">#f8fcff</color>
+    <color name="fangkuang">#4c7fe5</color>
+    <color name="feedcolor">#4c7fe5</color>
+
 
 
 </resources>

@@ -30,6 +30,7 @@ import com.lzy.okserver.task.ExecutorWithListener;
 import java.util.List;
 
 
+@Deprecated
 public class DownloadManagerActivity extends BaseActivity implements View.OnClickListener, ExecutorWithListener.OnAllTaskEndListener {
     private String  TAG = DownloadManagerActivity.class.getSimpleName();
 

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/title"
+        layout="@layout/title_bar"/>
+
+    <EditText
+        android:id="@+id/editContent"
+        android:layout_below="@+id/title"
+        android:layout_above="@+id/feedback_submit"
+        android:layout_marginTop="20dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="top"
+        android:textSize="20sp"
+        android:textColorHint="@color/feedcolor"
+        android:minLines="10"
+        android:hint="@string/feedback_hint"
+        android:textColor="@color/feedcolor"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@drawable/fangkuang"
+        />
+
+    <Button
+        android:id="@+id/feedback_submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/feedback_submit"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:textSize="21sp"
+        android:layout_alignParentBottom="true"
+        android:textColor="@color/white"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/shape"/>
+
+
+</RelativeLayout>

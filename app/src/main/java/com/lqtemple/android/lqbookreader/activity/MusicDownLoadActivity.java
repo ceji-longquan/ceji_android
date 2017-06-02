@@ -65,6 +65,10 @@ public class MusicDownLoadActivity extends BaseActivity {
     @InjectView(R.id.listView)
     ListView listView;
 
+    @InjectView(R.id.titleRightbtn)
+    private TextView titleRightbtn;
+    @InjectView(R.id.titleCenterbtn)
+    private TextView titleCenterbtn;
     private List<DownloadInfo> allTask;
 
 
@@ -76,6 +80,15 @@ public class MusicDownLoadActivity extends BaseActivity {
         checkVersion();
 
         initData();
+        titleCenterbtn.setText(getText(R.string.my_music));
+
+        titleRightbtn.setBackgroundResource(R.drawable.musicfile);
+        titleRightbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),MusicPlayerActivity.class));
+            }
+        });
 
         downloadManager = DownloadService.getDownloadManager();
         //设置下载目录

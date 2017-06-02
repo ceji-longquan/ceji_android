@@ -40,6 +40,7 @@ public abstract class BaseRecyclerAdapter<T, VH extends RecyclerView.ViewHolder>
         return mDatas == null ? 0 : mDatas.size();
     }
 
+
     /** 更新数据，替换原有数据 */
     public void updateItems(List<T> items) {
         mDatas = items;

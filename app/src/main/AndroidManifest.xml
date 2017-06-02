@@ -74,6 +74,46 @@
             android:singleUser="true"
             />
 
+
+
+        <activity
+            android:name=".activity.MyNoteActvity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:singleUser="true"
+            />
+        <activity
+            android:name=".activity.MyBookMarkActvity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:singleUser="true"
+            />
+
+        <activity
+            android:name=".activity.MyLanguageActvity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:singleUser="true"
+            />
+
+        <activity
+            android:name=".activity.MyShareActvity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:singleUser="true"
+            />
+
+        <activity
+            android:name=".activity.MyFeedBackActvity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:singleUser="true"
+            />
         <service
             android:name="com.lqtemple.android.lqbookreader.service.MediaService"
             android:enabled="true"

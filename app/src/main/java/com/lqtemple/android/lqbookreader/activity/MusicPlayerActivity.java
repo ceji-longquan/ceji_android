@@ -32,7 +32,8 @@ public class MusicPlayerActivity extends BasePlayActivity {
     @InjectView(R.id.musicListView)
     private ListView musicListView;
     private MySongListAdapter adapter;
-
+    @InjectView(R.id.titleCenterbtn)
+    private TextView titleCenterbtn;
     @InjectView(R.id.titleRightbtn)
     private TextView titleRightbtn;
 
@@ -42,6 +43,8 @@ public class MusicPlayerActivity extends BasePlayActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_player);
         InjectUtils.bind(this);
+        titleCenterbtn.setText(getText(R.string.music_play));
+
         //绑定事件接受
         EventBus.getDefault().register(this);
         setAdapter();
