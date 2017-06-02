@@ -9,11 +9,12 @@
     <color name="bt_accent">#00B8D4</color>
     <color name="notficatin_bg">#b5e0f1</color>
 
-    <color name="titleBar">#EBF5fF</color>
+    <color name="titleBar">#ebf5ff</color>
     <color name="white">#ffffff</color>
     <color name="bottom_text">#c1c0c0</color>
     <color name="notification_bak">#47fafafa</color>
     <color name="divider_color">#d5e6ff</color>
+    <color name="item_text_color">#000855</color>
 
 
 

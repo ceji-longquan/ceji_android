@@ -40,23 +40,39 @@ public class SettingActivity extends BaseActivity {
         InjectUtils.bind(this);
 
         initData();
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-            }
-        });
         mSettingAdapter = new SettingAdapter(this, my_setting_list);
         mListView.setAdapter(mSettingAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.e(TAG, "onItemClick: "+ position);
-                startActivity(new Intent(getApplicationContext(),DownLoadActivity.class));
+                Log.e(TAG, "onItemClick: " + position);
+                switch (position) {
+                    case 0:
+                        startActivity(new Intent(getApplicationContext(), DownLoadActivity.class));
+
+                        break;
+
+                    case 1:
+
+                        break;
+                    case 2:
+
+                        break;
+                    case 3:
+                        startActivity(new Intent(getApplicationContext(), MusicDownLoadActivity.class));
+                        break;
+                    case 4:
+
+                        break;
+                    case 5:
+
+                        break;
+
+                }
 
             }
         });
-
 
 
     }
