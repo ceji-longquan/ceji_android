@@ -17,7 +17,7 @@ import android.text.style.AbsoluteSizeSpan;
 import android.util.Log;
 
 import com.lqtemple.android.lqbookreader.Configuration;
-import com.lqtemple.android.lqbookreader.DensityUtil;
+import com.lqtemple.android.lqbookreader.util.DensityUtil;
 import com.lqtemple.android.lqbookreader.StaticLayoutFactory;
 import com.lqtemple.android.lqbookreader.model.Book;
 import com.lqtemple.android.lqbookreader.model.Content;

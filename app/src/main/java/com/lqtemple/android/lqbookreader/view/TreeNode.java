@@ -5,7 +5,7 @@ import java.util.List;
 
 import jedi.option.Option;
 
-import static com.lqtemple.android.lqbookreader.CollectionUtil.listElement;
+import static com.lqtemple.android.lqbookreader.util.CollectionUtil.listElement;
 import static java.util.Collections.unmodifiableList;
 import static jedi.functional.FunctionalPrimitives.forEach;
 

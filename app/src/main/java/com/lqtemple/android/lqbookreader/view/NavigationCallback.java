@@ -1,5 +1,7 @@
 package com.lqtemple.android.lqbookreader.view;
 
+import com.lqtemple.android.lqbookreader.util.UiUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 

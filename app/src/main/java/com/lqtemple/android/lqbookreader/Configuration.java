@@ -532,7 +532,7 @@ public class Configuration {
     }
 
     public int getVerticalMargin() {
-        return settings.getInt(KEY_MARGIN_V, 25);
+        return settings.getInt(KEY_MARGIN_V, 0);
     }
 
     public int getLineSpacing() {

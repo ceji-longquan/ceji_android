@@ -17,7 +17,7 @@
  * along with PageTurner.  If not, see <http://www.gnu.org/licenses/>.*
  */
 
-package com.lqtemple.android.lqbookreader;
+package com.lqtemple.android.lqbookreader.util;
 
 import android.annotation.TargetApi;
 import android.content.ClipData;

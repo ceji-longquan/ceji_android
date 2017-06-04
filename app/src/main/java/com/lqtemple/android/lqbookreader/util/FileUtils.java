@@ -1,4 +1,4 @@
-package com.lqtemple.android.lqbookreader;
+package com.lqtemple.android.lqbookreader.util;
 
 import android.text.TextUtils;
 

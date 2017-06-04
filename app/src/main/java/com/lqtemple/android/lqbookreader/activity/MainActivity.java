@@ -16,7 +16,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.lqtemple.android.lqbookreader.FileUtils;
+import com.lqtemple.android.lqbookreader.util.FileUtils;
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.activity.adapter.LeftMenuAdapter;
 

@@ -29,13 +29,10 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -76,12 +73,10 @@ import com.lqtemple.android.lqbookreader.BookProgress;
 import com.lqtemple.android.lqbookreader.Configuration;
 import com.lqtemple.android.lqbookreader.R;
 import com.lqtemple.android.lqbookreader.Singleton;
-import com.lqtemple.android.lqbookreader.TextUtil;
 import com.lqtemple.android.lqbookreader.activity.ReadingActivity;
 import com.lqtemple.android.lqbookreader.animation.Animations;
 import com.lqtemple.android.lqbookreader.animation.Animator;
 import com.lqtemple.android.lqbookreader.animation.PageCurlAnimator;
-import com.lqtemple.android.lqbookreader.animation.PageTimer;
 import com.lqtemple.android.lqbookreader.animation.RollingBlindAnimator;
 import com.lqtemple.android.lqbookreader.annotation.InjectUtils;
 import com.lqtemple.android.lqbookreader.annotation.InjectView;
@@ -96,7 +91,9 @@ import com.lqtemple.android.lqbookreader.read.SelectedWord;
 import com.lqtemple.android.lqbookreader.read.TextLoader;
 import com.lqtemple.android.lqbookreader.read.TextSelectionCallback;
 import com.lqtemple.android.lqbookreader.read.ToastFactory;
+import com.lqtemple.android.lqbookreader.util.TextUtil;
 import com.lqtemple.android.lqbookreader.view.AnimatedImageView;
+import com.lqtemple.android.lqbookreader.view.BatteryView;
 import com.lqtemple.android.lqbookreader.view.NavGestureDetector;
 import com.lqtemple.android.lqbookreader.view.NavigationCallback;
 
@@ -115,7 +112,7 @@ import jedi.option.Option;
 import static com.lqtemple.android.lqbookreader.Configuration.AnimationStyle;
 import static com.lqtemple.android.lqbookreader.Configuration.ReadingDirection;
 import static com.lqtemple.android.lqbookreader.Configuration.ScrollStyle;
-import static com.lqtemple.android.lqbookreader.PlatformUtil.isIntentAvailable;
+import static com.lqtemple.android.lqbookreader.util.PlatformUtil.isIntentAvailable;
 import static jedi.functional.FunctionalPrimitives.isEmpty;
 import static jedi.option.Options.none;
 import static jedi.option.Options.option;
@@ -145,7 +142,7 @@ public class ReadingFragment extends Fragment implements
     @InjectView(R.id.bookView)
     private BookView bookView;
 
-    @InjectView(R.id.myTitleBarTextView)
+    @InjectView(R.id.nameBook)
     private TextView titleBar;
 
     @InjectView(R.id.myTitleBarLayout)
@@ -160,8 +157,14 @@ public class ReadingFragment extends Fragment implements
     @InjectView(R.id.percentageField)
     private TextView percentageField;
 
-    @InjectView(R.id.authorField)
-    private TextView authorField;
+    @InjectView(R.id.current_battery)
+    private BatteryView mBatteryView;
+
+    @InjectView(R.id.current_time)
+    private TextView mTimeView;
+
+//    @InjectView(R.id.authorField)
+//    private TextView authorField;
 
     @InjectView(R.id.dummyView)
     private AnimatedImageView dummyView;
@@ -169,8 +172,8 @@ public class ReadingFragment extends Fragment implements
     @InjectView(R.id.mediaProgress)
     private SeekBar mediaProgressBar;
 
-    @InjectView(R.id.pageNumberView)
-    private TextView pageNumberView;
+//    @InjectView(R.id.pageNumberView)
+//    private TextView pageNumberView;
 
     @InjectView(R.id.playPauseButton)
     private ImageButton playPauseButton;
@@ -190,7 +193,6 @@ public class ReadingFragment extends Fragment implements
     // TODO init those members
     private TelephonyManager telephonyManager;
 
-
     private PowerManager powerManager;
 
     private AudioManager audioManager;
@@ -202,10 +204,6 @@ public class ReadingFragment extends Fragment implements
     private BookmarkDatabaseHelper bookmarkDatabaseHelper;
 
     private ProgressDialog waitDialog;
-
-
-    private boolean ttsAvailable = false;
-
     private String bookTitle;
     private String titleBase;
 
@@ -217,7 +215,6 @@ public class ReadingFragment extends Fragment implements
     private int currentPageNumber = -1;
 
     private SelectedWord selectedWord;
-
 
     private static enum Orientation {
         HORIZONTAL, VERTICAL
@@ -273,11 +270,7 @@ public class ReadingFragment extends Fragment implements
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB &&  config.isFullScreenEnabled() ) {
-            return inflater.inflate(R.layout.fragment_reading_fs, container, false);
-        } else {
-            return inflater.inflate(R.layout.fragment_reading, container, false);
-        }
+        return inflater.inflate(R.layout.fragment_reading, container, false);
     }
 
     @Override
@@ -460,33 +453,6 @@ public class ReadingFragment extends Fragment implements
         }
     }
 
-    private void playBeep( boolean error ) {
-
-        if ( ! isAdded() ) {
-            return;
-        }
-
-        try {
-            MediaPlayer beepPlayer = new MediaPlayer();
-
-            String file = "beep.mp3";
-
-            if ( error ) {
-                file = "error.mp3";
-            }
-
-            AssetFileDescriptor descriptor = context.getAssets().openFd(file);
-            beepPlayer.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength());
-            descriptor.close();
-
-            beepPlayer.prepare();
-
-            beepPlayer.start();
-        } catch (Exception io) {
-            //We'll manage without the beep :)
-        }
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -550,22 +516,22 @@ public class ReadingFragment extends Fragment implements
 
     private void displayPageNumber(int pageNumber) {
 
-        String pageString;
-
-        if ( !config.isScrollingEnabled() && pageNumber > 0) {
-            pageString = Integer.toString(pageNumber) + "\n";
-        } else {
-            pageString = "\n";
-        }
-
-        pageNumberView.setTextColor(config.getTextColor());
-        pageNumberView.setTextSize(config.getTextSize());
-
-//        pageNumberView.setTypeface(config.getDefaultFontFamily().getDefaultTypeface());
-
-        pageNumberView.setText(pageString);
-        pageNumberView.setGravity(Gravity.CENTER);
-        pageNumberView.invalidate();
+//        String pageString;
+//
+//        if ( !config.isScrollingEnabled() && pageNumber > 0) {
+//            pageString = Integer.toString(pageNumber) + "\n";
+//        } else {
+//            pageString = "\n";
+//        }
+//
+//        pageNumberView.setTextColor(config.getTextColor());
+//        pageNumberView.setTextSize(config.getTextSize());
+//
+////        pageNumberView.setTypeface(config.getDefaultFontFamily().getDefaultTypeface());
+//
+//        pageNumberView.setText(pageString);
+//        pageNumberView.setGravity(Gravity.CENTER);
+//        pageNumberView.invalidate();
     }
 
     public Book getBook() {
@@ -727,7 +693,7 @@ public class ReadingFragment extends Fragment implements
         activity.setTitle(titleBase);
         this.titleBar.setText(titleBase);
 
-        this.authorField.setText(book.getAuthorName());
+//        this.authorField.setText(book.getAuthorName());
 
         backgroundHandler.post( () -> {
             try {
@@ -1252,20 +1218,7 @@ public class ReadingFragment extends Fragment implements
     }
 
     private void preparePageTimer() {
-        bookView.pageDown();
-        Option<Bitmap> after = getBookViewSnapshot();
 
-        if ( isEmpty( after ) ) {
-            throw new IllegalStateException( "Could not initialize view" );
-        }
-
-        after.forEach((Command<? super Bitmap>) img -> {
-            PageTimer timer = new PageTimer(img, pageNumberView.getHeight());
-
-            timer.setSpeed(config.getScrollSpeed());
-
-            dummyView.setAnimator(timer);
-        });
     }
 
     private void doPageCurl(boolean flipRight, boolean pageDown) {
@@ -1282,8 +1235,6 @@ public class ReadingFragment extends Fragment implements
         }
 
         Option<Bitmap> before = getBookViewSnapshot();
-
-        this.pageNumberView.setVisibility(View.GONE);
 
         PageCurlAnimator animator = new PageCurlAnimator(flipRight);
 
@@ -1342,7 +1293,6 @@ public class ReadingFragment extends Fragment implements
             }
 
             dummyView.setAnimator(null);
-            pageNumberView.setVisibility(View.VISIBLE);
 
         } else {
             animator.advanceOneFrame();
@@ -1365,8 +1315,6 @@ public class ReadingFragment extends Fragment implements
             viewSwitcher.showNext();
         }
 
-        this.pageNumberView.setVisibility(View.VISIBLE);
-
         bookView.setKeepScreenOn(false);
     }
 
@@ -1382,29 +1330,29 @@ public class ReadingFragment extends Fragment implements
 
             bookView.draw(canvas);
 
-            if (config.isShowPageNumbers()) {
-
-                /**
-                 * FIXME: creating an intermediate bitmap here because I can't
-                 * figure out how to draw the pageNumberView directly on the
-                 * canvas and have it show up in the right place.
-                 */
-
-                Bitmap pageNumberBitmap = Bitmap.createBitmap(
-                        pageNumberView.getWidth(), pageNumberView.getHeight(),
-                        Config.ARGB_8888);
-                Canvas pageNumberCanvas = new Canvas(pageNumberBitmap);
-
-                pageNumberView.layout(0, 0, pageNumberView.getWidth(),
-                        pageNumberView.getHeight());
-                pageNumberView.draw(pageNumberCanvas);
-
-                canvas.drawBitmap(pageNumberBitmap, 0, viewSwitcher.getHeight()
-                        - pageNumberView.getHeight(), new Paint());
-
-                pageNumberBitmap.recycle();
-
-            }
+//            if (config.isShowPageNumbers()) {
+//
+//                /**
+//                 * FIXME: creating an intermediate bitmap here because I can't
+//                 * figure out how to draw the pageNumberView directly on the
+//                 * canvas and have it show up in the right place.
+//                 */
+//
+//                Bitmap pageNumberBitmap = Bitmap.createBitmap(
+//                        pageNumberView.getWidth(), pageNumberView.getHeight(),
+//                        Config.ARGB_8888);
+//                Canvas pageNumberCanvas = new Canvas(pageNumberBitmap);
+//
+//                pageNumberView.layout(0, 0, pageNumberView.getWidth(),
+//                        pageNumberView.getHeight());
+//                pageNumberView.draw(pageNumberCanvas);
+//
+//                canvas.drawBitmap(pageNumberBitmap, 0, viewSwitcher.getHeight()
+//                        - pageNumberView.getHeight(), new Paint());
+//
+//                pageNumberBitmap.recycle();
+//
+//            }
 
             return option(bitmap);
         } catch (OutOfMemoryError out) {
@@ -1423,7 +1371,7 @@ public class ReadingFragment extends Fragment implements
         */
         bitmap.forEach((Command<? super Bitmap>) dummyView::setImageBitmap);
 
-        this.pageNumberView.setVisibility(View.GONE);
+//        this.pageNumberView.setVisibility(View.GONE);
 
         inAnim.setAnimationListener(new Animation.AnimationListener() {
 
@@ -1449,9 +1397,7 @@ public class ReadingFragment extends Fragment implements
     }
 
     private void onSlideFinished() {
-        if ( currentPageNumber > 0 ) {
-            this.pageNumberView.setVisibility(View.VISIBLE);
-        }
+
     }
 
     private void pageDown(Orientation o) {
@@ -1653,7 +1599,7 @@ public class ReadingFragment extends Fragment implements
 
         int pageStart = bookView.getStartOfCurrentPage();
 
-        String text = bookTitle + ", " + authorField.getText() + "\n";
+        String text = bookTitle + ", " + getBook().getAuthorName() + "\n";
 
         int offset = pageStart + from;
 

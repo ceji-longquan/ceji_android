@@ -3,7 +3,7 @@ package com.lqtemple.android.lqbookreader.read;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
-import com.lqtemple.android.lqbookreader.FileUtils;
+import com.lqtemple.android.lqbookreader.util.FileUtils;
 import com.lqtemple.android.lqbookreader.model.Book;
 import com.lqtemple.android.lqbookreader.model.RawBook;
 

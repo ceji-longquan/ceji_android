@@ -1,30 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-				android:layout_width="fill_parent"
-				android:layout_height="fill_parent"
-				android:orientation="vertical"
-				android:id="@+id/rel"
-				>
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:orientation="vertical"
+	android:id="@+id/rel">
 
     <ViewSwitcher xmlns:android="http://schemas.android.com/apk/res/android"
     	android:id="@+id/mainContainer"
-    	android:layout_width="fill_parent"
-    	android:layout_height="fill_parent"    
+    	android:layout_width="match_parent"
+    	android:layout_height="match_parent"
     	android:orientation="vertical">
-    
-   
-                
+
         <com.lqtemple.android.lqbookreader.read.BookView
             android:id="@+id/bookView"
-        	android:layout_width="fill_parent"
-			android:layout_height="fill_parent">
+        	android:layout_width="match_parent"
+			android:layout_height="match_parent">
+				<!--Top bar-->
+				<LinearLayout
+					android:id="@+id/book_top_bar"
+					android:layout_width="match_parent"
+					android:orientation="horizontal"
+					android:gravity="center_vertical"
+					android:layout_height="36dp">
+					<TextView
+						android:id="@+id/titleBookChapter"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:textSize="@dimen/top_bar_txt_size"
+						android:textColor="@color/dark_grey"
+						tools:text="第一章"
+						android:gravity="start"/>
+					<TextView
+						android:id="@+id/nameBook"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textSize="@dimen/top_bar_txt_size"
+						android:textColor="@color/dark_grey"
+						tools:text="侧记"
+						android:gravity="end"/>
+				</LinearLayout>
 
-			<com.lqtemple.android.lqbookreader.read.InnerView
-				android:id="@+id/innerView"
-				android:layout_width="fill_parent"
-				android:layout_height="fill_parent"
-				android:layout_weight="1" />
+				<!-- Bottom bar -->
+				<LinearLayout
+					android:id="@+id/book_bottom_bar"
+					android:layout_width="match_parent"
+					android:layout_height="32dp"
+					android:gravity="center_vertical"
+					android:orientation="horizontal"
+					android:layout_alignParentBottom="true">
 
+					<TextView
+						android:id="@+id/percentageField"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:text="@string/zero_percent"
+						android:textSize="@dimen/bottom_bar_txt_size"
+						android:textColor="@color/dark_grey"
+						tools:text="33/566" />
+
+					<com.lqtemple.android.lqbookreader.view.BatteryView
+						android:id="@+id/current_battery"
+						android:layout_width="32dp"
+						android:layout_height="16dp"
+						android:layout_marginEnd="2dp"
+						android:layout_marginRight="2dp" />
+
+					<com.lqtemple.android.lqbookreader.view.TimeView
+						android:id="@+id/current_time"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textSize="@dimen/bottom_bar_txt_size"
+						android:textColor="@color/dark_grey"
+						tools:text="11:39" />
+				</LinearLayout>
+
+				<com.lqtemple.android.lqbookreader.read.InnerView
+					android:layout_below="@id/book_top_bar"
+					android:layout_above="@id/book_bottom_bar"
+					android:id="@+id/innerView"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent" />
 
 		</com.lqtemple.android.lqbookreader.read.BookView>
 	    <com.lqtemple.android.lqbookreader.view.AnimatedImageView
@@ -49,45 +107,13 @@
         	android:orientation="vertical"        
         	android:layout_alignBottom="@id/mainContainer"
         	android:visibility="gone"
-        	>   
+        	>
 
-         <TextView
-                android:id="@+id/myTitleBarTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"                
-                android:layout_alignParentTop="true"                             
-                android:background="@color/translucent_black"                
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@color/opaque_white"
-                android:gravity="center"/>/>
-        
-          <TextView
-                android:id="@+id/authorField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"                
-                android:textColor="@color/opaque_white"
-                android:layout_below="@id/myTitleBarTextView"                              
-                android:background="@color/translucent_black"                
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:gravity="center"/>
-
-         
-           <TextView
-                android:id="@+id/percentageField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/opaque_white"
-                android:text="@string/zero_percent"
-                android:layout_below="@id/authorField"
-                                       
-                android:background="@color/translucent_black"                
-                android:textAppearance="?android:attr/textAppearanceSmall" /> 
                 
           <SeekBar android:id="@+id/titleProgress"
         	style="?android:attr/progressBarStyleHorizontal"
         	android:layout_width="fill_parent"        	
         	android:layout_height="wrap_content"        
-        	android:layout_below="@id/percentageField"        	        	
                 android:background="@color/translucent_black"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"

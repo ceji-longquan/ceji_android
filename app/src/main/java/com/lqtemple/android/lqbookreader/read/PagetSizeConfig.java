@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.text.TextPaint;
 
 import com.lqtemple.android.lqbookreader.Configuration;
-import com.lqtemple.android.lqbookreader.DensityUtil;
+import com.lqtemple.android.lqbookreader.util.DensityUtil;
 import com.lqtemple.android.lqbookreader.MyApplication;
 
 /**
@@ -13,8 +13,8 @@ import com.lqtemple.android.lqbookreader.MyApplication;
  */
 public class PagetSizeConfig {
 
-    private static final int TOP_TITLE_HEIGHT = DensityUtil.dip2px(MyApplication.getsContext(), 24);
-    private static final int BOTTOM_DECORATION = (int) (TOP_TITLE_HEIGHT * 1.2f);
+    private static final int TOP_TITLE_HEIGHT = DensityUtil.dip2px(MyApplication.getsContext(), 36);
+    private static final int BOTTOM_DECORATION = DensityUtil.dip2px(MyApplication.getsContext(), 32);
     private static int sSpacing = 0;
     private static TextPaint sPaint = new TextPaint();
 

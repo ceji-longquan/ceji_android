@@ -10,7 +10,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
-import com.lqtemple.android.lqbookreader.DensityUtil;
+import com.lqtemple.android.lqbookreader.util.DensityUtil;
 
 /**
  * @author Administrator

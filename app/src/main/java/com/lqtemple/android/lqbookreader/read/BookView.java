@@ -3,18 +3,16 @@ package com.lqtemple.android.lqbookreader.read;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.text.Layout;
-import android.text.Spannable;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ClickableSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.ScrollView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.lqtemple.android.lqbookreader.Configuration;
@@ -33,8 +31,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import jedi.functional.Command;
 import jedi.option.Option;
@@ -49,7 +45,7 @@ import static jedi.option.Options.some;
 /**
  * Created by sundxing on 16/12/4.
  */
-public class BookView extends ScrollView{
+public class BookView extends RelativeLayout {
 
     public static final String TAG = "BookView";
     private static final Logger LOG = LoggerFactory.getLogger("BookView");
@@ -106,9 +102,6 @@ public class BookView extends ScrollView{
         if (Build.VERSION.SDK_INT >= Configuration.TEXT_SELECTION_PLATFORM_VERSION ) {
             childView.setTextIsSelectable(true);
         }
-
-        this.setSmoothScrollingEnabled(false);
-
     }
 
     public void update() {
@@ -483,34 +476,6 @@ public class BookView extends ScrollView{
         return pageNum;
     }
 
-    public String getFirstLine() {
-        int topLeft = strategy.getTopLeftPosition();
-
-        String plainText = "";
-
-        if ( getStrategy().getText() != null ) {
-            plainText = getStrategy().getText().toString();
-        }
-
-        if ( plainText.length() == 0 ) {
-            return plainText;
-        }
-
-        plainText = plainText.substring( topLeft, plainText.length() ).trim();
-
-        int firstNewLine = plainText.indexOf( '\n' );
-
-        if ( firstNewLine == -1 ) {
-            return plainText;
-        }
-
-        return plainText.substring(0, firstNewLine);
-    }
-
-    public int getLineSpacing() {
-        return lineSpacing;
-    }
-
     // TODO rename index
     public int getIndex() {
         if (this.spine == null) {
@@ -530,11 +495,6 @@ public class BookView extends ScrollView{
 
     public String getFileName() {
         return fileName;
-    }
-
-
-    public PageChangeStrategy getStrategy() {
-        return this.strategy;
     }
 
     public int getStartOfCurrentPage() {
@@ -854,127 +814,6 @@ public class BookView extends ScrollView{
         this.fileName = null;
 
         this.strategy.reset();
-    }
-
-    /**
-     *  Params is string index : like '1-2-0';
-     */
-    private class LoadTextTask extends
-            AsyncTask<String, BookReadPhase, Option<Spanned>> {
-
-        private String name;
-
-        private String searchTerm = null;
-
-        public LoadTextTask() {
-
-        }
-
-        LoadTextTask(String searchTerm) {
-            this.searchTerm = searchTerm;
-        }
-
-        public Option<Spanned> doInBackground(String... resources) {
-
-            publishProgress(BookReadPhase.START);
-
-            try {
-
-                this.name = spine.getCurrentTitle().getOrElse("");
-
-
-                publishProgress(BookReadPhase.PARSE_TEXT);
-
-                Spannable result = textLoader.getText(resources[0]);
-
-                //Clear any old highlighting spans
-
-                SearchResultSpan[] spans = result.getSpans(0, result.length(), SearchResultSpan.class);
-                for ( BackgroundColorSpan span: spans ) {
-                    result.removeSpan(span);
-                }
-
-                // Highlight search results (if any)
-                if ( searchTerm != null ) {
-                    Pattern pattern = Pattern.compile(Pattern.quote((searchTerm)),Pattern.CASE_INSENSITIVE);
-                    Matcher matcher = pattern.matcher(result);
-
-                    while ( matcher.find() ) {
-                        result.setSpan(new SearchResultSpan(),
-                                matcher.start(), matcher.end(),
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-                }
-
-                //If the view isn't ready yet, wait a bit.
-//                while ( getInnerView().getWidth() == 0 ) {
-//                    Thread.sleep(100);
-//                }
-
-                strategy.loadText(result);
-
-                return option(result);
-            } catch (Exception | OutOfMemoryError io ) {
-                LOG.error( "Error loading text", io );
-
-                //FIXME: actually use this error
-                //this.error = String.format( getContext().getString(R.string.could_not_load),
-                //      io.getMessage());
-
-                //this.error = getContext().getString(R.string.out_of_memory);
-            }
-
-            return none();
-        }
-
-        public void doOnProgressUpdate(BookReadPhase... values) {
-
-            BookReadPhase phase = values[0];
-
-            switch (phase) {
-                case START:
-                    parseEntryStart(getIndex());
-                    break;
-                case PARSE_TEXT:
-                    fireRenderingText();
-                    break;
-                case DONE:
-                    parseEntryComplete(this.name);
-                    break;
-            }
-        }
-
-        @Override
-        protected void onProgressUpdate(BookReadPhase... values) {
-           doOnProgressUpdate(values);
-        }
-
-        @Override
-        protected void onPostExecute(Option<Spanned> spanneds) {
-            doOnPostExecute(spanneds);
-        }
-
-        public void doOnPostExecute(Option<Spanned> result) {
-
-            restorePosition();
-            strategy.updateGUI();
-            progressUpdate();
-
-            onProgressUpdate(BookReadPhase.DONE);
-
-            /**
-             * This is a hack for scrolling not updating to the right position
-             * on Android 4+
-             */
-            if ( strategy.isScrolling() ) {
-                scrollHandler.postDelayed( BookView.this::restorePosition, 100 );
-            }
-        }
-    }
-
-
-    private static enum BookReadPhase {
-        START, OPEN_FILE, PARSE_TEXT, DONE
     }
 
     @SuppressLint("ParcelCreator")

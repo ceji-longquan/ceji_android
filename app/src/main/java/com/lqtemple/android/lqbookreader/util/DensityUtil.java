@@ -1,5 +1,5 @@
 
-package com.lqtemple.android.lqbookreader;
+package com.lqtemple.android.lqbookreader.util;
 
 import android.annotation.TargetApi;
 import android.content.Context;

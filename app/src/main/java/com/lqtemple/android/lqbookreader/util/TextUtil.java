@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with PageTurner.  If not, see <http://www.gnu.org/licenses/>.*
  */
-package com.lqtemple.android.lqbookreader;
+package com.lqtemple.android.lqbookreader.util;
 
 import java.util.List;
 import java.util.regex.Matcher;
