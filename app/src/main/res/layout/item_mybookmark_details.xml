@@ -23,7 +23,7 @@
             android:layout_alignParentLeft="true"
             android:src="@mipmap/my_bookmark_icon"/>
 
-        <TextView
+        <com.lqtemple.android.lqbookreader.view.TextContentTextView
             android:id="@+id/mark_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
             android:layout_alignParentRight="true"
             android:text="appName"/>
 
-        <TextView
+        <com.lqtemple.android.lqbookreader.view.TextContentTextView
             android:id="@+id/mark"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -49,31 +49,34 @@
         android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
-        <TextView
+        <com.lqtemple.android.lqbookreader.view.TitleTextView
             android:id="@+id/min_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="left"
-            android:text="appName"/>
+            android:textSize="21sp"
+            android:text="第一章"/>
 
-        <TextView
+        <com.lqtemple.android.lqbookreader.view.TitleTextView
             android:id="@+id/min_title_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="3"
             android:gravity="center"
-            android:text="appName"/>
+            android:textSize="21sp"
+            android:text="修复身后"/>
 
     </LinearLayout>
 
 
-    <TextView
+    <com.lqtemple.android.lqbookreader.view.ContentTextView
         android:id="@+id/mark_content"
         android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="appNameappNameappNameappNameappNameappNameappNamNameappNameappNameappNameappNameappName"/>
+        android:gravity="left"
+        android:text="学诚大和尚是中国佛教界的领军人物学诚大和尚是中国佛教界的领军人物学诚大和尚是中国佛教界的领军人物学诚大和尚是中国佛教界的领军人物"/>
 
 
 

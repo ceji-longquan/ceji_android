@@ -47,6 +47,8 @@ import com.lqtemple.android.lqbookreader.util.MediaUtil;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.List;
+
 import static com.lqtemple.android.lqbookreader.service.MediaService.isPlaying;
 import static com.lqtemple.android.lqbookreader.service.MediaService.mContext;
 import static com.lqtemple.android.lqbookreader.util.MediaUtil.getInstacen;
@@ -140,6 +142,7 @@ public class PlaybackControlsFragment extends Fragment {
         mPlayPause.setEnabled(true);
         mPlayPause.setOnClickListener(mButtonListener);
         audioSeekBar = (SeekBar) rootView.findViewById(R.id.seekBar);
+       
         mTitle = (TextView) rootView.findViewById(R.id.title);
         mSubtitle = (TextView) rootView.findViewById(R.id.artist);
         mExtraInfo = (TextView) rootView.findViewById(R.id.extra_info);
@@ -149,10 +152,21 @@ public class PlaybackControlsFragment extends Fragment {
         rootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent playIntent = new Intent(getActivity(), FullScreenPlayerActivity.class);
-                playIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                playIntent.putExtra("music", getInstacen().getSongList().get(MediaUtil.CURRENTPOS));
-                startActivity(playIntent);
+                List<MusicMedia> songList = MediaUtil.getInstacen().getSongList();
+                Log.i(TAG,"songList="+songList.size());
+                if(songList.size()>0){
+                    Intent playIntent = new Intent(getActivity(), FullScreenPlayerActivity.class);
+                    playIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    if(MediaUtil.CURRENTPOS<0){
+                        Toast.makeText(getActivity(),R.string.select_yinpin,0).show();
+                        return;
+                    }
+                    playIntent.putExtra("music",songList.get(MediaUtil.CURRENTPOS));
+                    startActivity(playIntent);
+                }else{
+                    Toast.makeText(getActivity(),R.string.select_yinpin,0).show();
+                }
+
 
                 //                playIntent.putExtra("position", position);
             }

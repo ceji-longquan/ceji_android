@@ -71,7 +71,7 @@ public class MyBookMarkActvity extends BaseActivity {
             mModel.setMark(i+"");
             mModel.setMarkTime("2017-5-30");
             mModel.setMinTitle("AAAAAA");
-            mModel.setMinTitleContent("AAAAAAAAAAAAAAAAAAAAAAAAA");
+            mModel.setMinTitleContent("AAAAAA");
             mModel.setBookMarkeContent("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             mModels.add(mModel);
 

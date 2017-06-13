@@ -32,7 +32,7 @@
         android:id="@+id/down_item_layout"
         >
 
-        <TextView
+        <com.lqtemple.android.lqbookreader.view.TitleTextView
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
                 android:src="@mipmap/download_icon"
                 />
 
-            <TextView
+            <com.lqtemple.android.lqbookreader.view.TitleTextView
                 android:id="@+id/down_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

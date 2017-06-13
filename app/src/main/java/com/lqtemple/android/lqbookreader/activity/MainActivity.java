@@ -4,40 +4,34 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.StrictMode;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.lqtemple.android.lqbookreader.util.FileUtils;
 import com.lqtemple.android.lqbookreader.R;
-import com.lqtemple.android.lqbookreader.activity.adapter.LeftMenuAdapter;
+import com.lqtemple.android.lqbookreader.view.RoundView;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private Toolbar toolbar;
-    private DrawerLayout mDrawerLayout;
-    private RelativeLayout leftLayout;
-    private RelativeLayout rightLayout;
     private TextView titleLefttbtn, titleRightbtn;
-
-    private LeftMenuAdapter mLeftMenuAdapter, mRightMenuAdapter;
-    private ArrayList mLeftArrayList;
-    private ArrayList mRightArrayList;
-//    private ListView leftListView;
-
+    private RecyclerView mRecyclerView;
+    private List<String> mDatas;
+    private HomeAdapter mAdapter;
     private File target;
 
     @Override
@@ -46,37 +40,38 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initView();
         initToolBar();
-
-        StrictMode.enableDefaults();
+//        StrictMode.enableDefaults();
 
         // 全屏
         initData();
-/*        leftListView = (ListView) leftLayout.findViewById(R.id.left_listview);
-        leftListView.setAdapter(mLeftMenuAdapter);
-        leftListView.setOnItemClickListener(new DrawerItemClickListener());
+        mDatas=new ArrayList<>();
+        mDatas.add("AAA");
+        mDatas.add("BBB");
+        mDatas.add("CCC");
+        mDatas.add("DDD");
+        mDatas.add("DDD");
+        mDatas.add("DDD");
+        mDatas.add("DDD");
+        mDatas.add("DDD");
+        mDatas.add("DDD");
+        mDatas.add("DDD");
+        mDatas.add("DDD");
+        mDatas.add("DDD");
+        mDatas.add("BBB");
 
-        ListView rightListView = (ListView) rightLayout.findViewById(R.id.right_listview);
+//        List<View> mViews =new ArrayList<>();
+//        for (int i=0;i<5;i++ ) {
+//            View view =new RoundView(getApplicationContext());
+//            mViews.add(view);
+//        }
 
-        mLeftMenuAdapter = new LeftMenuAdapter(this, mLeftArrayList);
-        mRightMenuAdapter = new LeftMenuAdapter(this, mRightArrayList);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(mAdapter = new HomeAdapter());
 
-        rightListView.setAdapter(mRightMenuAdapter);
-*/
+
 
     }
 
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            selectItem(position);
-        }
-
-    }
-
-    private void selectItem(int position) {
-        Log.e(TAG, "selectItem: " + position);
-
-    }
 
     private void initToolBar() {
         if (toolbar != null) {
@@ -86,26 +81,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initView() {
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerlayout);
         titleLefttbtn = (TextView) findViewById(R.id.titleLefttbtn);
+        titleLefttbtn.setVisibility(View.GONE);
         titleRightbtn = (TextView) findViewById(R.id.titleRightbtn);
 
         toolbar = (Toolbar) findViewById(R.id.titleBar);
-        leftLayout = (RelativeLayout) findViewById(R.id.left);
-        rightLayout = (RelativeLayout) findViewById(R.id.right);
-        titleLefttbtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
-                    mDrawerLayout.closeDrawer(Gravity.LEFT);
-                } else {
-                    mDrawerLayout.openDrawer(Gravity.LEFT);
-                    if (mDrawerLayout.isDrawerOpen(Gravity.RIGHT)) {
-                        mDrawerLayout.closeDrawer(Gravity.RIGHT);
-                    }
-                }
-            }
-        });
+
         titleRightbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        mRecyclerView =(RecyclerView)findViewById(R.id.id_recyclerview);
+
 
     }
 
@@ -128,23 +112,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
 
         }
-/*
-        mLeftArrayList = new ArrayList<LeftMenu>();
-        mLeftArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
-        mLeftArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
-        mLeftArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
-        mLeftArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
-        mLeftArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
-        mLeftArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
 
-
-        mRightArrayList = new ArrayList<LeftMenu>();
-        mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
-        mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
-        mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
-        mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
-        mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));
-        mRightArrayList.add(new LeftMenu(R.drawable.setting, getString(R.string.menu_title1)));*/
     }
 
 
@@ -155,4 +123,62 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.MyViewHolder>
+    {
+
+
+
+
+        @Override
+        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
+        {
+            MyViewHolder holder = new MyViewHolder(LayoutInflater.from(
+                    getApplicationContext()).inflate(R.layout.item_main, parent,
+                    false));
+            return holder;
+        }
+
+        @Override
+        public void onBindViewHolder(MyViewHolder holder, int position)
+        {
+            holder.tv.setText(mDatas.get(position));
+            holder.roundview.addView(new RoundView(getApplicationContext()));
+            holder.roundview.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    int pos = holder.getLayoutPosition();
+                    Log.i(TAG,"pos=="+pos);
+                    Log.i(TAG,"position=="+position);
+                    Intent i = new Intent(getApplicationContext(), ReadingActivity.class);
+                    i.setData(Uri.fromFile(target));
+                    startActivity(i);
+
+                }
+            });;
+        }
+
+        @Override
+        public int getItemCount()
+        {
+            return mDatas.size();
+        }
+
+        class MyViewHolder extends RecyclerView.ViewHolder
+        {
+
+            TextView tv;
+            LinearLayout roundview;
+
+            public MyViewHolder(View view)
+            {
+                super(view);
+                tv = (TextView) view.findViewById(R.id.chapter);
+                roundview =(LinearLayout) view.findViewById(R.id.roundview);
+            }
+        }
+    }
+
 }
+

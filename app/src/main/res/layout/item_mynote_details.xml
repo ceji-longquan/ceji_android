@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
+        <com.lqtemple.android.lqbookreader.view.TitleTextView
             android:id="@+id/min_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -21,7 +21,7 @@
             android:gravity="center"
             android:text="appName"/>
 
-        <TextView
+        <com.lqtemple.android.lqbookreader.view.TitleTextView
             android:id="@+id/min_title_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,13 +43,14 @@
             android:layout_height="20dp"
             android:src="@mipmap/book_icon"/>
 
-        <TextView
+        <com.lqtemple.android.lqbookreader.view.ContentTextView
             android:id="@+id/booke_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_weight="1"
-            android:text="appNameappNameappNameappNameappNameappNameappNamNameappNameappNameappNameappNameapme"/>
+            android:textColor="@color/contextText"
+            android:text="学诚大和尚是中国佛教界的领军人物学诚大和尚是中国佛教界的领军人物学诚大和尚是中国佛教界的领军人物学诚大和尚是中国佛教界的领军人物"/>
 
     </LinearLayout>
 
@@ -65,13 +66,14 @@
             android:layout_height="24dp"
             android:src="@mipmap/note_icon"/>
 
-        <TextView
+        <com.lqtemple.android.lqbookreader.view.ContentTextView
             android:id="@+id/note_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
+            android:textColor="@color/feedcolor"
             android:layout_weight="1"
-            android:text="appNameappNameappNameappNameappNameappNameappNamNameappNameappNameappNameappNameappName"/>
+            android:text="学诚大和尚是中国佛教界的领军人物学诚大和尚是中国佛教界的领军人物学诚大和尚是中国佛教界的领军人物学诚大和尚是中国佛教界的领军人物"/>
 
     </LinearLayout>
 
@@ -81,7 +83,7 @@
         android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
-        <TextView
+        <com.lqtemple.android.lqbookreader.view.ContentTextView
             android:id="@+id/note_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -13,6 +13,7 @@ public class MediaUtil {
 	private List<MusicMedia> songList = new ArrayList<MusicMedia>();
 	// 当前正在播放
 	public static int CURRENTPOS = -1;
+
 	public static int LAST_POS = -1;
 
 	public static int PLAYSTATE = ConstantValue.OPTION_PAUSE;
